@@ -13,7 +13,7 @@ const Footer = () => {
           <div>
             <div className="flex items-center space-x-2 mb-4">
               <div className="w-10 h-10 rounded-lg overflow-hidden">
-                <img src={logo} alt="Eldeetech" className="w-full h-full object-contain" />
+                <img src={logo} alt="Eldeetech" className="w-full h-full object-cover" />
               </div>
               <div className="flex flex-col">
                 <span className="font-bold text-lg leading-tight">Eldeetech</span>
