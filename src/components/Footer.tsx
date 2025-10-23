@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { Facebook, Instagram, Linkedin, Twitter, Mail, MapPin, Phone, Zap } from "lucide-react";
+import { Facebook, Instagram, Linkedin, Twitter, Mail, MapPin, Phone } from "lucide-react";
+import logo from "../assets/eldeetech-logo.png";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -11,8 +12,8 @@ const Footer = () => {
           {/* Company Info */}
           <div>
             <div className="flex items-center space-x-2 mb-4">
-              <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center">
-                <Zap className="w-6 h-6 text-accent-foreground" />
+              <div className="w-10 h-10 rounded-lg overflow-hidden">
+                <img src={logo} alt="Eldeetech" className="w-full h-full object-contain" />
               </div>
               <div className="flex flex-col">
                 <span className="font-bold text-lg leading-tight">Eldeetech</span>
