@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Zap } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import logo from "@/assets/eldeetech-logo.png";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,14 +23,8 @@ const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 group">
-            <div className="w-10 h-10 rounded-lg bg-gradient-primary flex items-center justify-center transform group-hover:scale-110 transition-transform">
-              <Zap className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-bold text-lg leading-tight text-foreground">Eldeetech</span>
-              <span className="text-xs text-muted-foreground">Ltd</span>
-            </div>
+          <Link to="/" className="flex items-center group">
+            <img src={logo} alt="Eldeetech Ltd" className="h-10 transform group-hover:scale-105 transition-transform" />
           </Link>
 
           {/* Desktop Navigation */}
