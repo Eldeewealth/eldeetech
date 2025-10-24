@@ -9,6 +9,7 @@ import Services from "./pages/Services";
 import Training from "./pages/Training";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
+import WhatsAppWidget from "./components/WhatsAppWidget";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,10 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <WhatsAppWidget 
+          phoneNumber="+2347082777516" 
+          message="Good day, i am interested in Eldeetech Services" 
+        />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
