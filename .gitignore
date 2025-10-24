@@ -22,4 +22,37 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-.env
+# Environment files (keep examples)
+.env.*
+*.env
+!.env.example
+!.env.sample
+
+# Package manager auth tokens
+.npmrc
+.yarnrc
+.pnpmrc
+
+# Certificates and private keys
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*.cer
+
+# Secrets and credentials
+secrets/
+.secret
+*.secret
+
+# SSH keys
+.ssh/
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+
+# Hosting provider local configs
+.vercel/
+.netlify/
