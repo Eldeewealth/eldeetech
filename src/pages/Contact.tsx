@@ -49,26 +49,32 @@ const Contact = () => {
 
     setSubmitting(true);
     try {
-      // Netlify Forms expects application/x-www-form-urlencoded
-      await fetch("/", {
+      const res = await fetch("https://formsubmit.co/ajax/info@eldeetech.com.ng", {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: encode({
-          "form-name": "contact",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
           name: formData.name,
           email: formData.email,
           phone: formData.phone,
           subject: formData.subject,
           message: formData.message,
-          "bot-field": formData["bot-field"],
+          cc: "eldeetech1@gmail.com",
+          _honey: formData["bot-field"],
+          _subject:
+            formData.subject || `New contact from ${formData.name || "Unknown"}`,
         }),
       });
-
+  
+      if (!res.ok) throw new Error("Failed to send");
+  
       toast({
         title: "Message Sent!",
         description: "Thank you for contacting us. We'll get back to you soon.",
       });
-
+  
       setFormData({
         name: "",
         email: "",
@@ -182,13 +188,9 @@ const Contact = () => {
                 {/* Netlify Form */}
                 <form
                   onSubmit={handleSubmit}
-                  name="contact"                    // must match "form-name"
-                  method="POST"
-                  data-netlify="true"
-                  data-netlify-honeypot="bot-field"
                   className="space-y-6"
                 >
-                  {/* Hidden inputs required for Netlify Forms (SSR detection) */}
+                  {/* Removed Netlify hidden inputs; using external form service (Formsubmit) */}
                   <input type="hidden" name="form-name" value="contact" />
                   <p className="hidden">
                     <label>
