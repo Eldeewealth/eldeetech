@@ -64,13 +64,13 @@ const Contact = () => {
     {
       icon: Phone,
       title: "Phone",
-      content: "+234 XXX XXX XXXX",
-      link: "tel:+234XXXXXXXXX",
+      content: "+234 708 2777 516",
+      link: "tel:+2347082777516",
     },
     {
       icon: MapPin,
       title: "Location",
-      content: "Nigeria",
+      content: "Ebonyi, Nigeria",
       link: null,
     },
   ];
@@ -180,7 +180,7 @@ const Contact = () => {
                         type="tel"
                         value={formData.phone}
                         onChange={handleChange}
-                        placeholder="+234 XXX XXX XXXX"
+                        placeholder="+234 708 2777 516"
                         className="border-border bg-background"
                       />
                     </div>
