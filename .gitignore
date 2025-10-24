@@ -1,39 +1,48 @@
-# Logs
-logs
+# ── Logs
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+.eslintcache
 
-node_modules
-dist
-dist-ssr
+# ── Dependencies / builds / caches
+node_modules/
+dist/
+dist-ssr/
+.vite/
+.cache/
+.tmp/
+temp/
+tmp/
 *.local
 
-# Editor directories and files
+# ── Editors & OS junk
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
+Thumbs.db
+*.sw?
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
-*.sw?
-# Environment files (keep examples)
+
+# ── Environment (keep examples in repo)
+.env
 .env.*
-*.env
 !.env.example
 !.env.sample
 
-# Package manager auth tokens
+# ── Package manager auth tokens
 .npmrc
 .yarnrc
 .pnpmrc
 
-# Certificates and private keys
+# ── Certificates & private keys
 *.pem
 *.key
 *.crt
@@ -41,18 +50,36 @@ dist-ssr
 *.pfx
 *.cer
 
-# Secrets and credentials
+# ── Secrets & credentials
 secrets/
 .secret
 *.secret
 
-# SSH keys
+# ── SSH keys
 .ssh/
 id_rsa
 id_dsa
 id_ecdsa
 id_ed25519
 
-# Hosting provider local configs
+# ── Hosting provider local configs
 .vercel/
 .netlify/
+
+# ── Tests & coverage (add if you use them)
+coverage/
+cypress/
+playwright-report/
+test-results/
+jest/
+__tests__/
+*.spec.*
+*.test.*
+
+# ── Storybook (if used)
+.storybook-out/
+storybook-static/
+
+# ── Monorepo/Build systems (optional)
+.turbo/
+nx-out/
