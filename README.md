@@ -1,73 +1,112 @@
-# Welcome to your Lovable project
+# 🌐 Eldeetech Ltd – Official Website
 
-## Project info
+**Live Preview:** [https://eldeetch.netlify.app](https://eldeetch.netlify.app)  
+**Custom Domain:** [https://eldeetech.com.ng](https://eldeetech.com.ng)
 
-**URL**: https://eldeetech.com.ng/
+---
 
-## How can I edit this code?
+## 🏢 About Eldeetech Ltd
 
-There are several ways of editing your application.
+Eldeetech Ltd is an integrated **Information Technology, Digital Solutions, and Data Consultancy** firm based in Nigeria.  
+We deliver end-to-end technology services — from software development and digital transformation to data analytics and cloud consulting — empowering businesses and individuals to thrive in a digital economy.
 
-**Use Lovable**
+This website serves as our **corporate presence and client gateway**, showcasing our expertise, service portfolio, and contact channels.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/c48780c8-0899-4ca7-ba28-8b27398652f8) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🎯 Purpose of the Website
 
-**Use your preferred IDE**
+The Eldeetech website was designed to:
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- Present Eldeetech Ltd as a **modern, innovative, and trustworthy IT solutions provider**.  
+- Communicate the company’s **vision, mission, and service offerings** clearly.  
+- Provide a **professional contact interface** for client inquiries and project requests.  
+- Integrate with **Zoho Mail** for business communication via `info@eldeetech.com.ng`.  
+- Demonstrate the company’s capability in **front-end engineering, UX design, and cloud deployment**.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+The project aligns with Eldeetech’s brand identity — simplicity, performance, and precision — while maintaining full responsiveness and SEO-ready structure.
 
-Follow these steps:
+---
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+## ⚙️ Tech Stack
+
+| Category | Technologies |
+|-----------|--------------|
+| **Frontend Framework** | [React 18+](https://react.dev/) |
+| **Build Tool** | [Vite](https://vitejs.dev/) |
+| **Language** | TypeScript |
+| **UI Components** | [shadcn/ui](https://ui.shadcn.com/) |
+| **Styling** | [Tailwind CSS](https://tailwindcss.com/) |
+| **Icons** | [Lucide React](https://lucide.dev/) |
+| **Hosting** | [Netlify](https://www.netlify.com/) |
+| **Mail Integration** | [Zoho Mail](https://www.zoho.com/mail/) |
+| **Domain** | `eldeetech.com.ng` via Cloudflare DNS |
+
+---
+
+## 🧩 Key Features
+
+- **Modern UI/UX:** Clean interface with responsive layouts for mobile, tablet, and desktop.  
+- **Dynamic Components:** Built with modular React + TypeScript structure.  
+- **Contact Form:** Netlify Forms integration for secure, spam-protected submissions sent to Zoho Mail.  
+- **Optimized Performance:** Fast builds, lazy loading, and compressed assets.  
+- **SEO-Friendly:** Proper meta tags, OpenGraph previews, and clean URL routing.  
+- **SSL & Security:** HTTPS enforced via Let’s Encrypt on Netlify and Cloudflare.
+
+---
+
+## 🛠️ Local Development
+
+To run and modify the project locally:
+
+```bash
+# 1️⃣ Clone this repository
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# 2️⃣ Move into the project directory
+cd eldeetech-website
 
-# Step 3: Install the necessary dependencies.
-npm i
+# 3️⃣ Install dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# 4️⃣ Start the development server
 npm run dev
-```
+Then visit http://localhost:5173 in your browser.
 
-**Edit a file directly in GitHub**
+🚀 Deployment (Netlify)
+The project is continuously deployed on Netlify.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Build settings:
 
-**Use GitHub Codespaces**
+Build command: npm run build
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Publish directory: dist/
 
-## What technologies are used for this project?
+Custom domain setup:
 
-This project is built with:
+Primary: eldeetech.com.ng
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+SSL certificate: Automatic (Let’s Encrypt)
 
-## How can I deploy this project?
+DNS managed via Cloudflare (CNAME → eldeetch.netlify.app)
 
-Simply open [Lovable](https://lovable.dev/projects/c48780c8-0899-4ca7-ba28-8b27398652f8) and click on Share -> Publish.
+📂 Folder Structure
+bash
+Copy code
+src/
+  ├── assets/        # Images, icons, illustrations
+  ├── components/    # Reusable UI components
+  ├── pages/         # Page components (Home, Services, Contact)
+  ├── hooks/         # Custom React hooks
+  ├── lib/           # Utilities and helpers
+  ├── styles/        # Tailwind + custom CSS
+  └── main.tsx       # Application entry point
+💬 Contact
+Eldeetech Ltd
+📧 info@eldeetech.com.ng
+🌐 https://eldeetech.com.ng
 
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+🪪 License & Credits
+This repository is maintained by Loveday Okwudiri Okoro (Founder / Data & Technology Lead).
+© 2025 Eldeetech Ltd — All rights reserved.
+Unauthorized redistribution or use without consent is prohibited.
