@@ -26,7 +26,6 @@ const Contact = () => {
     botcheck: "",
   });
   const [submitting, setSubmitting] = useState(false);
-  const ACCESS_KEY = import.meta.env.VITE_WEB3FORMS_KEY;
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -52,37 +51,24 @@ const Contact = () => {
       return;
     }
 
-    if (!ACCESS_KEY) {
-      toast({
-        title: "Missing access key",
-        description: "Web3Forms key is not loaded. Ensure .env has VITE_WEB3FORMS_KEY and restart the server.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setSubmitting(true);
     try {
-      const res = await fetch("https://api.web3forms.com/submit", {
+      const res = await fetch("/.netlify/functions/send-mail", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          access_key: ACCESS_KEY,
-          subject:
-            formData.subject || `New contact from ${formData.name} – Eldeetech Website`,
-          from_name: "Eldeetech Ltd",
-          reply_to: formData.email,
-          cc: "info@eldeetech.com.ng, eldeetech1@gmail.com",
           name: formData.name,
           email: formData.email,
           phone: formData.phone,
+          subject: formData.subject,
           message: formData.message,
-          botcheck: formData.botcheck,
+          honeypot: formData.botcheck,
+          website: window.location.origin,
         }),
       });
 
       const json = await res.json();
-      if (json.success) {
+      if (json?.success) {
         toast({
           title: "Message Sent!",
           description: "Thank you for contacting us. We'll get back to you soon.",
@@ -98,7 +84,7 @@ const Contact = () => {
       } else {
         toast({
           title: "Submission failed",
-          description: json.message || "Failed to send message. Please try again.",
+          description: json?.message || "Failed to send message. Please try again.",
           variant: "destructive",
         });
       }
@@ -221,16 +207,6 @@ const Contact = () => {
                   // Removed leftover Netlify inputs
                   // (deleted form-name and bot-field elements)
                
-                  <p className="hidden">
-                    <label>
-                      Don’t fill this out:{" "}
-                      <input
-                        name="bot-field"
-                        value={formData["bot-field"]}
-                        onChange={handleChange}
-                      />
-                    </label>
-                  </p>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
