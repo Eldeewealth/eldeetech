@@ -10,7 +10,7 @@ const Training = () => {
     {
       icon: Code,
       title: "Web Development Bootcamp",
-      duration: "16 Weeks",
+      duration: "20 Weeks",
       level: "Beginner to Advanced",
       description: "Master modern web development with HTML, CSS, JavaScript, React, and backend technologies.",
       topics: ["HTML/CSS Fundamentals", "JavaScript & React", "Backend Development", "Database Management"],
@@ -18,7 +18,7 @@ const Training = () => {
     {
       icon: Briefcase,
       title: "Digital Marketing Mastery",
-      duration: "8 Weeks",
+      duration: "12 Weeks",
       level: "All Levels",
       description: "Learn to create effective digital marketing campaigns that drive results and grow businesses.",
       topics: ["SEO & Content Marketing", "Social Media Strategy", "Email Marketing", "Analytics & ROI"],
@@ -26,7 +26,7 @@ const Training = () => {
     {
       icon: TrendingUp,
       title: "Financial Trading Academy",
-      duration: "10 Weeks",
+      duration: "16 Weeks",
       level: "Beginner to Intermediate",
       description: "Comprehensive training in forex and cryptocurrency trading with practical strategies.",
       topics: ["Market Analysis", "Trading Strategies", "Risk Management", "Platform Mastery"],
@@ -34,7 +34,7 @@ const Training = () => {
     {
       icon: Target,
       title: "Leadership Development",
-      duration: "6 Weeks",
+      duration: "8 Weeks",
       level: "Professional",
       description: "Develop essential leadership skills to inspire teams and drive organizational success.",
       topics: ["Leadership Principles", "Team Management", "Strategic Thinking", "Communication Skills"],
