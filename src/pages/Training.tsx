@@ -10,7 +10,7 @@ const Training = () => {
     {
       icon: Code,
       title: "Web Development Bootcamp",
-      duration: "12 Weeks",
+      duration: "16 Weeks",
       level: "Beginner to Advanced",
       description: "Master modern web development with HTML, CSS, JavaScript, React, and backend technologies.",
       topics: ["HTML/CSS Fundamentals", "JavaScript & React", "Backend Development", "Database Management"],

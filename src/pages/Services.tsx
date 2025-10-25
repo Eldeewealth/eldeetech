@@ -1,4 +1,4 @@
-import { Cpu, Cloud, Network, Palette, Globe, Smartphone, TrendingUp, DollarSign, ShoppingBag, Package } from "lucide-react";
+import { Cpu, Cloud, Network, Palette, Globe, Smartphone, TrendingUp, DollarSign, ShoppingBag, Package, Search, BarChart3, Database, Server, Settings, Code } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -25,6 +25,7 @@ const Services = () => {
         { name: "Mobile App Development", icon: Smartphone, description: "Native and cross-platform mobile apps" },
         { name: "Digital Marketing", icon: TrendingUp, description: "SEO, social media, and content marketing" },
         { name: "Brand Identity", icon: Palette, description: "Logo design, brand guidelines, and visual identity" },
+        { name: "Software Development", icon: Code, description: "Custom web and software applications tailored to your needs" },
       ],
     },
     {
@@ -45,6 +46,17 @@ const Services = () => {
         { name: "Tech Accessories", icon: Package, description: "Quality gadgets and tech accessories" },
         { name: "E-Commerce Solutions", icon: ShoppingBag, description: "Online store setup and management" },
         { name: "Hardware Procurement", icon: Package, description: "Bulk hardware sourcing and supply" },
+      ],
+    },
+    {
+      title: "Data Science & AI",
+      icon: TrendingUp,
+      services: [
+        { name: "Predictive Analytics", icon: TrendingUp, description: "Build models to forecast trends and outcomes" },
+        { name: "NLP & Search", icon: Search, description: "Text processing, semantic search, and intelligent assistants" },
+        { name: "Dashboards/BI", icon: BarChart3, description: "Interactive dashboards and business intelligence reporting" },
+        { name: "Data Engineering", icon: Database, description: "Data pipelines, warehousing, and scalable data architectures" },
+        { name: "MLOps Deployment", icon: Server, description: "Model deployment, monitoring, and lifecycle automation" },
       ],
     },
   ];

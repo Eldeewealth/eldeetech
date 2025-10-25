@@ -1,3 +1,4 @@
+// src/pages/Contact.tsx
 import { useState } from "react";
 import { Mail, MapPin, Phone, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,12 @@ import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
+// Util: URL-encode body for Netlify Forms
+const encode = (data: Record<string, string>) =>
+  Object.keys(data)
+    .map((k) => encodeURIComponent(k) + "=" + encodeURIComponent(data[k]))
+    .join("&");
+
 const Contact = () => {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
@@ -16,12 +23,21 @@ const Contact = () => {
     phone: "",
     subject: "",
     message: "",
+    botcheck: "",
   });
+  const [submitting, setSubmitting] = useState(false);
+  const ACCESS_KEY = import.meta.env.VITE_WEB3FORMS_KEY;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((s) => ({ ...s, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Basic validation
+
     if (!formData.name || !formData.email || !formData.message) {
       toast({
         title: "Error",
@@ -31,27 +47,70 @@ const Contact = () => {
       return;
     }
 
-    // Here you would typically send the data to your backend
-    toast({
-      title: "Message Sent!",
-      description: "Thank you for contacting us. We'll get back to you soon.",
-    });
+    if (formData.botcheck) {
+      // honeypot triggered; silently abort
+      return;
+    }
 
-    // Reset form
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      subject: "",
-      message: "",
-    });
-  };
+    if (!ACCESS_KEY) {
+      toast({
+        title: "Missing access key",
+        description: "Web3Forms key is not loaded. Ensure .env has VITE_WEB3FORMS_KEY and restart the server.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setSubmitting(true);
+    try {
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          access_key: ACCESS_KEY,
+          subject:
+            formData.subject || `New contact from ${formData.name} – Eldeetech Website`,
+          from_name: "Eldeetech Ltd",
+          reply_to: formData.email,
+          cc: "info@eldeetech.com.ng, eldeetech1@gmail.com",
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          message: formData.message,
+          botcheck: formData.botcheck,
+        }),
+      });
+
+      const json = await res.json();
+      if (json.success) {
+        toast({
+          title: "Message Sent!",
+          description: "Thank you for contacting us. We'll get back to you soon.",
+        });
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          subject: "",
+          message: "",
+          botcheck: "",
+        });
+      } else {
+        toast({
+          title: "Submission failed",
+          description: json.message || "Failed to send message. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (err) {
+      toast({
+        title: "Network error",
+        description: "Please try again or email us directly at info@eldeetech.com.ng.",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const contactInfo = [
@@ -88,7 +147,8 @@ const Contact = () => {
               Get in <span className="text-accent">Touch</span>
             </h1>
             <p className="text-xl text-muted-foreground">
-              Have a question or ready to start your project? We'd love to hear from you
+              Have a question or ready to start your project? We'd love to hear
+              from you
             </p>
           </div>
         </div>
@@ -101,13 +161,18 @@ const Contact = () => {
             {contactInfo.map((info, index) => {
               const Icon = info.icon;
               return (
-                <Card key={index} className="border-border bg-card hover:shadow-tech transition-all duration-300 group">
+                <Card
+                  key={index}
+                  className="border-border bg-card hover:shadow-tech transition-all duration-300 group"
+                >
                   <CardContent className="p-6 text-center space-y-4">
                     <div className="w-14 h-14 rounded-xl bg-gradient-primary flex items-center justify-center mx-auto group-hover:scale-110 transition-transform shadow-lg">
                       <Icon className="w-7 h-7 text-primary-foreground" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-foreground mb-2">{info.title}</h3>
+                      <h3 className="font-semibold text-foreground mb-2">
+                        {info.title}
+                      </h3>
                       {info.link ? (
                         <a
                           href={info.link}
@@ -133,13 +198,46 @@ const Contact = () => {
           <div className="max-w-3xl mx-auto">
             <Card className="border-border bg-gradient-card shadow-tech">
               <CardHeader>
-                <CardTitle className="text-3xl text-center text-foreground">Send Us a Message</CardTitle>
+                <CardTitle className="text-3xl text-center text-foreground">
+                  Send Us a Message
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Netlify Form */}
+                <form
+                  onSubmit={handleSubmit}
+                  className="space-y-6"
+                >
+                  {/* Honeypot (hidden) */}
+                  <input
+                    type="text"
+                    name="botcheck"
+                    value={formData.botcheck}
+                    onChange={handleChange}
+                    className="hidden"
+                    tabIndex={-1}
+                    autoComplete="off"
+                  />
+                  // Removed leftover Netlify inputs
+                  // (deleted form-name and bot-field elements)
+               
+                  <p className="hidden">
+                    <label>
+                      Don’t fill this out:{" "}
+                      <input
+                        name="bot-field"
+                        value={formData["bot-field"]}
+                        onChange={handleChange}
+                      />
+                    </label>
+                  </p>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label htmlFor="name" className="text-sm font-medium text-foreground">
+                      <label
+                        htmlFor="name"
+                        className="text-sm font-medium text-foreground"
+                      >
                         Name <span className="text-destructive">*</span>
                       </label>
                       <Input
@@ -153,7 +251,10 @@ const Contact = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label htmlFor="email" className="text-sm font-medium text-foreground">
+                      <label
+                        htmlFor="email"
+                        className="text-sm font-medium text-foreground"
+                      >
                         Email <span className="text-destructive">*</span>
                       </label>
                       <Input
@@ -162,7 +263,7 @@ const Contact = () => {
                         type="email"
                         value={formData.email}
                         onChange={handleChange}
-                        placeholder="your@email.com"
+                        placeholder="you@example.com"
                         required
                         className="border-border bg-background"
                       />
@@ -171,7 +272,10 @@ const Contact = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label htmlFor="phone" className="text-sm font-medium text-foreground">
+                      <label
+                        htmlFor="phone"
+                        className="text-sm font-medium text-foreground"
+                      >
                         Phone
                       </label>
                       <Input
@@ -185,7 +289,10 @@ const Contact = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label htmlFor="subject" className="text-sm font-medium text-foreground">
+                      <label
+                        htmlFor="subject"
+                        className="text-sm font-medium text-foreground"
+                      >
                         Subject
                       </label>
                       <Input
@@ -200,7 +307,10 @@ const Contact = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <label htmlFor="message" className="text-sm font-medium text-foreground">
+                    <label
+                      htmlFor="message"
+                      className="text-sm font-medium text-foreground"
+                    >
                       Message <span className="text-destructive">*</span>
                     </label>
                     <Textarea
@@ -218,9 +328,11 @@ const Contact = () => {
                   <Button
                     type="submit"
                     size="lg"
+                    disabled={submitting}
                     className="w-full bg-gradient-primary hover:opacity-90"
                   >
-                    Send Message <Send className="ml-2 w-5 h-5" />
+                    {submitting ? "Sending..." : "Send Message"}{" "}
+                    <Send className="ml-2 w-5 h-5" />
                   </Button>
                 </form>
               </CardContent>

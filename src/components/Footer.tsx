@@ -21,11 +21,11 @@ const Footer = () => {
               </div>
             </div>
             <p className="text-sm opacity-90 mb-4">
-              Empowering Technology, Creativity, and Innovation
+              Empowering Technology, Creativity and AI-Driven Innovation
             </p>
             <div className="flex space-x-3">
               <a
-                href="https://facebook.com"
+                href="https://facebook.com/Eldeetech"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-full bg-primary-foreground/10 hover:bg-accent flex items-center justify-center transition-colors"
