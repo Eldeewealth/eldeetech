@@ -58,11 +58,10 @@ const Contact = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           access_key: import.meta.env.VITE_WEB3FORMS_KEY,
-          subject:
-            formData.subject || `New contact from ${formData.name} – Eldeetech Website`,
+          to: ["eldeetech1@gmail.com"], // both verified
+          subject: formData.subject || `New contact from ${formData.name} – Eldeetech Website`,
           from_name: "Eldeetech Ltd",
           reply_to: formData.email,
-          cc: "eldeetech1@gmail.com",
           name: formData.name,
           email: formData.email,
           phone: formData.phone,
@@ -209,7 +208,7 @@ const Contact = () => {
                     autoComplete="off"
                   />
                   <input type="hidden" name="form-name" value="contact" />
-                  // Removed leftover Netlify inputs
+               
                   <p className="hidden">
                     <label>
                       Don’t fill this out:{" "}
