@@ -77,42 +77,40 @@ npm install
 
 # 4️⃣ Start the development server
 npm run dev
-Then visit http://localhost:5173 in your browser.
+```
 
-🚀 Deployment (Netlify)
-The project is continuously deployed on Netlify.
+**Edit a file directly in GitHub**
 
-Build settings:
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
 
-Build command: npm run build
+**Use GitHub Codespaces**
 
-Publish directory: dist/
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
 
-Custom domain setup:
+## What technologies are used for this project?
 
-Primary: eldeetech.com.ng
+This project is built with:
 
-SSL certificate: Automatic (Let’s Encrypt)
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
 
-DNS managed via Cloudflare (CNAME → eldeetch.netlify.app)
+## How can I deploy this project?
 
-📂 Folder Structure
-bash
-Copy code
-src/
-  ├── assets/        # Images, icons, illustrations
-  ├── components/    # Reusable UI components
-  ├── pages/         # Page components (Home, Services, Contact)
-  ├── hooks/         # Custom React hooks
-  ├── lib/           # Utilities and helpers
-  ├── styles/        # Tailwind + custom CSS
-  └── main.tsx       # Application entry point
-💬 Contact
-Eldeetech Ltd
-📧 info@eldeetech.com.ng
-🌐 https://eldeetech.com.ng
+Simply open [Lovable](https://lovable.dev/projects/c48780c8-0899-4ca7-ba28-8b27398652f8) and click on Share -> Publish.
 
-🪪 License & Credits
-This repository is maintained by Loveday Okwudiri Okoro (Founder / Data & Technology Lead).
-© 2025 Eldeetech Ltd — All rights reserved.
-Unauthorized redistribution or use without consent is prohibited.
+## Can I connect a custom domain to my Lovable project?
+
+Yes, you can!
+
+To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+
+Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)

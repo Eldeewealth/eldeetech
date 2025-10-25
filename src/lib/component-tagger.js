@@ -1,5 +1,5 @@
 // Simple component tagger plugin for Vite
-// This is a replacement for lovable-tagger
+// Adds component name comments to React files during development
 
 export function componentTagger() {
   return {
