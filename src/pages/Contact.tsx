@@ -17,11 +17,11 @@ const Contact = () => {
     subject: "",
     message: "",
   });
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Basic validation
+
     if (!formData.name || !formData.email || !formData.message) {
       toast({
         title: "Error",
@@ -31,20 +31,38 @@ const Contact = () => {
       return;
     }
 
-    // Here you would typically send the data to your backend
-    toast({
-      title: "Message Sent!",
-      description: "Thank you for contacting us. We'll get back to you soon.",
-    });
+    try {
+      setLoading(true);
+      const res = await fetch("/.netlify/functions/send-mail", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
-    // Reset form
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      subject: "",
-      message: "",
-    });
+      const data = await res.json().catch(() => ({ success: false, message: "Invalid server response" }));
+
+      if (res.ok && data?.success) {
+        toast({
+          title: "Message Sent!",
+          description: "Thank you for contacting us. We'll get back to you soon.",
+        });
+        setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
+      } else {
+        toast({
+          title: "Failed to send",
+          description: data?.message || "Unable to send message at the moment.",
+          variant: "destructive",
+        });
+      }
+    } catch (err) {
+      toast({
+        title: "Network error",
+        description: "Please check your connection and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -137,6 +155,8 @@ const Contact = () => {
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* honeypot field for bots */}
+                  <input type="text" name="botcheck" className="hidden" tabIndex={-1} autoComplete="off" />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label htmlFor="name" className="text-sm font-medium text-foreground">
@@ -219,8 +239,9 @@ const Contact = () => {
                     type="submit"
                     size="lg"
                     className="w-full bg-gradient-primary hover:opacity-90"
+                    disabled={loading}
                   >
-                    Send Message <Send className="ml-2 w-5 h-5" />
+                    {loading ? "Sending..." : "Send Message"} <Send className="ml-2 w-5 h-5" />
                   </Button>
                 </form>
               </CardContent>
