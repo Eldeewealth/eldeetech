@@ -16,6 +16,7 @@ exports.handler = async (event) => {
   if (event.httpMethod !== "POST") return bad(405, "Method Not Allowed");
 
   try {
+    console.log("[fn] using host:", process.env.ZOHO_SMTP_HOST, "user:", process.env.ZOHO_USER);
     const data = JSON.parse(event.body || "{}");
 
     // Honeypot (silently accept bots)
