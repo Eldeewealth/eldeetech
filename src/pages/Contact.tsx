@@ -23,8 +23,7 @@ const Contact = () => {
     phone: "",
     subject: "",
     message: "",
-    // honeypot (Netlify spam trap)
-    ["bot-field"]: "",
+    botcheck: "",
   });
   const [submitting, setSubmitting] = useState(false);
 
@@ -47,47 +46,56 @@ const Contact = () => {
       return;
     }
 
+    if (formData.botcheck) {
+      // honeypot triggered; silently abort
+      return;
+    }
+
     setSubmitting(true);
     try {
-      const res = await fetch("https://formsubmit.co/ajax/info@eldeetech.com.ng", {
+      const res = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          access_key: import.meta.env.VITE_WEB3FORMS_KEY,
+          subject:
+            formData.subject || `New contact from ${formData.name} – Eldeetech Website`,
+          from_name: "Eldeetech Ltd",
+          reply_to: formData.email,
+          cc: "eldeetech1@gmail.com",
           name: formData.name,
           email: formData.email,
           phone: formData.phone,
-          subject: formData.subject,
           message: formData.message,
-          cc: "eldeetech1@gmail.com",
-          _honey: formData["bot-field"],
-          _subject:
-            formData.subject || `New contact from ${formData.name || "Unknown"}`,
+          botcheck: formData.botcheck,
         }),
       });
-  
-      if (!res.ok) throw new Error("Failed to send");
-  
-      toast({
-        title: "Message Sent!",
-        description: "Thank you for contacting us. We'll get back to you soon.",
-      });
-  
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        subject: "",
-        message: "",
-        ["bot-field"]: "",
-      });
+
+      const json = await res.json();
+      if (json.success) {
+        toast({
+          title: "Message Sent!",
+          description: "Thank you for contacting us. We'll get back to you soon.",
+        });
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          subject: "",
+          message: "",
+          botcheck: "",
+        });
+      } else {
+        toast({
+          title: "Submission failed",
+          description: json.message || "Failed to send message. Please try again.",
+          variant: "destructive",
+        });
+      }
     } catch (err) {
       toast({
-        title: "Submission failed",
-        description:
-          "Please try again or email us directly at info@eldeetech.com.ng.",
+        title: "Network error",
+        description: "Please try again or email us directly at info@eldeetech.com.ng.",
         variant: "destructive",
       });
     } finally {
@@ -190,8 +198,18 @@ const Contact = () => {
                   onSubmit={handleSubmit}
                   className="space-y-6"
                 >
-                  {/* Removed Netlify hidden inputs; using external form service (Formsubmit) */}
+                  {/* Honeypot (hidden) */}
+                  <input
+                    type="text"
+                    name="botcheck"
+                    value={formData.botcheck}
+                    onChange={handleChange}
+                    className="hidden"
+                    tabIndex={-1}
+                    autoComplete="off"
+                  />
                   <input type="hidden" name="form-name" value="contact" />
+                  // Removed leftover Netlify inputs
                   <p className="hidden">
                     <label>
                       Don’t fill this out:{" "}
