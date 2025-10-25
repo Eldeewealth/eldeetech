@@ -26,6 +26,7 @@ const Contact = () => {
     botcheck: "",
   });
   const [submitting, setSubmitting] = useState(false);
+  const ACCESS_KEY = import.meta.env.VITE_WEB3FORMS_KEY;
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -51,17 +52,27 @@ const Contact = () => {
       return;
     }
 
+    if (!ACCESS_KEY) {
+      toast({
+        title: "Missing access key",
+        description: "Web3Forms key is not loaded. Ensure .env has VITE_WEB3FORMS_KEY and restart the server.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSubmitting(true);
     try {
       const res = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          access_key: import.meta.env.VITE_WEB3FORMS_KEY,
-          to: ["eldeetech1@gmail.com"], // both verified
-          subject: formData.subject || `New contact from ${formData.name} – Eldeetech Website`,
+          access_key: ACCESS_KEY,
+          subject:
+            formData.subject || `New contact from ${formData.name} – Eldeetech Website`,
           from_name: "Eldeetech Ltd",
           reply_to: formData.email,
+          cc: "info@eldeetech.com.ng, eldeetech1@gmail.com",
           name: formData.name,
           email: formData.email,
           phone: formData.phone,
@@ -207,7 +218,8 @@ const Contact = () => {
                     tabIndex={-1}
                     autoComplete="off"
                   />
-                  <input type="hidden" name="form-name" value="contact" />
+                  // Removed leftover Netlify inputs
+                  // (deleted form-name and bot-field elements)
                
                   <p className="hidden">
                     <label>
