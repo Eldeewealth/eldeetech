@@ -16,6 +16,7 @@ const Contact = () => {
     phone: "",
     subject: "",
     message: "",
+    botcheck: "", // honeypot in state
   });
   const [loading, setLoading] = useState(false);
 
@@ -31,36 +32,49 @@ const Contact = () => {
       return;
     }
 
+    // Abort after 15s
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+
     try {
       setLoading(true);
-      const res = await fetch("/.netlify/functions/send-mail", {
+      const res = await fetch("/api/send-mail", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
+        signal: controller.signal,
       });
 
-      const data = await res.json().catch(() => ({ success: false, message: "Invalid server response" }));
+      const ct = res.headers.get("content-type") || "";
+      let data: any = null;
+      if (ct.includes("application/json")) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        data = { success: false, message: `Invalid server response: ${text.slice(0, 200)}` };
+      }
 
       if (res.ok && data?.success) {
         toast({
           title: "Message Sent!",
           description: "Thank you for contacting us. We'll get back to you soon.",
         });
-        setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
+        setFormData({ name: "", email: "", phone: "", subject: "", message: "", botcheck: "" });
       } else {
-        toast({
-          title: "Failed to send",
-          description: data?.message || "Unable to send message at the moment.",
-          variant: "destructive",
-        });
+        const msg = data?.message || `${res.status} ${res.statusText}` || "Unable to send message at the moment.";
+        toast({ title: "Failed to send", description: msg, variant: "destructive" });
       }
-    } catch (err) {
+    } catch (err: any) {
+      const aborted = err?.name === "AbortError";
       toast({
-        title: "Network error",
-        description: "Please check your connection and try again.",
+        title: aborted ? "Request timed out" : "Network error",
+        description: aborted
+          ? "The request took too long (15s). Please try again."
+          : "Please check your connection and try again.",
         variant: "destructive",
       });
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   };
@@ -156,7 +170,15 @@ const Contact = () => {
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {/* honeypot field for bots */}
-                  <input type="text" name="botcheck" className="hidden" tabIndex={-1} autoComplete="off" />
+                  <input
+                    type="text"
+                    name="botcheck"
+                    value={formData.botcheck}
+                    onChange={handleChange}
+                    className="hidden"
+                    tabIndex={-1}
+                    autoComplete="off"
+                  />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label htmlFor="name" className="text-sm font-medium text-foreground">
