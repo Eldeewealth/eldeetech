@@ -1,9 +1,10 @@
 import { Cpu, Cloud, Network, Palette, Globe, Smartphone, TrendingUp, DollarSign, ShoppingBag, Package, Search, BarChart3, Database, Server, Settings, Code } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { useEffect } from "react";
 
 const Services = () => {
   const serviceCategories = [
@@ -61,6 +62,19 @@ const Services = () => {
     },
   ];
 
+  // Helper to build stable, URL-safe IDs
+  const slug = (s: string) =>
+    s.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+  // Smooth scroll to hash target when navigated with /services#...
+  const location = useLocation();
+  useEffect(() => {
+    if (location.hash) {
+      const el = document.getElementById(location.hash.slice(1));
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [location]);
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -83,8 +97,10 @@ const Services = () => {
       {/* Services Categories */}
       {serviceCategories.map((category, categoryIndex) => {
         const CategoryIcon = category.icon;
+        const categoryId = `category-${slug(category.title)}`;
         return (
           <section
+            id={categoryId}
             key={categoryIndex}
             className={`py-20 ${categoryIndex % 2 === 0 ? "bg-background" : "bg-secondary/30"}`}
           >
@@ -102,27 +118,32 @@ const Services = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {category.services.map((service, serviceIndex) => {
                     const ServiceIcon = service.icon;
+                    const subject = `Enquiry on your "${service.name}" service`;
+                    const to = `/contact?subject=${encodeURIComponent(subject)}`;
+                    const serviceId = `service-${slug(service.name)}`;
+
                     return (
-                      <Card
-                        key={serviceIndex}
-                        className="border-border bg-card hover:shadow-tech transition-all duration-300 group"
-                      >
-                        <CardHeader>
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-center space-x-3">
-                              <div className="w-12 h-12 rounded-lg bg-gradient-primary flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
-                                <ServiceIcon className="w-6 h-6 text-primary-foreground" />
+                      <div id={serviceId} key={serviceIndex}>
+                        <Link to={to} className="block" aria-label={subject}>
+                          <Card className="border-border bg-card hover:shadow-tech transition-all duration-300 group cursor-pointer hover:ring-2 hover:ring-accent">
+                            <CardHeader>
+                              <div className="flex items-start justify-between">
+                                <div className="flex items-center space-x-3">
+                                  <div className="w-12 h-12 rounded-lg bg-gradient-primary flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
+                                    <ServiceIcon className="w-6 h-6 text-primary-foreground" />
+                                  </div>
+                                  <CardTitle className="text-xl text-foreground group-hover:text-accent transition-colors">
+                                    {service.name}
+                                  </CardTitle>
+                                </div>
                               </div>
-                              <CardTitle className="text-xl text-foreground group-hover:text-accent transition-colors">
-                                {service.name}
-                              </CardTitle>
-                            </div>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-muted-foreground">{service.description}</p>
-                        </CardContent>
-                      </Card>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-muted-foreground">{service.description}</p>
+                            </CardContent>
+                          </Card>
+                        </Link>
+                      </div>
                     );
                   })}
                 </div>

@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Facebook, Instagram, Linkedin, Twitter, Mail, MapPin, Phone } from "lucide-react";
 import logo from "../assets/eldeetech-logo.png";
 
-const Footer = () => {
+function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
@@ -94,11 +94,46 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold text-lg mb-4">Services</h3>
             <ul className="space-y-2">
-              <li className="text-sm opacity-90">IT Consultancy</li>
-              <li className="text-sm opacity-90">Digital Marketing</li>
-              <li className="text-sm opacity-90">Web Development</li>
-              <li className="text-sm opacity-90">Fintech Solutions</li>
-              <li className="text-sm opacity-90">E-Commerce</li>
+              <li>
+                <Link
+                  to="/services#service-it-consulting"
+                  className="text-sm opacity-90 hover:opacity-100 hover:text-accent transition-colors"
+                >
+                  IT Consultancy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/services#service-digital-marketing"
+                  className="text-sm opacity-90 hover:opacity-100 hover:text-accent transition-colors"
+                >
+                  Digital Marketing
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/services#service-web-design-development"
+                  className="text-sm opacity-90 hover:opacity-100 hover:text-accent transition-colors"
+                >
+                  Web Development
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/services#category-financial-technology-and-trading"
+                  className="text-sm opacity-90 hover:opacity-100 hover:text-accent transition-colors"
+                >
+                  Fintech Solutions
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/services#service-e-commerce-solutions"
+                  className="text-sm opacity-90 hover:opacity-100 hover:text-accent transition-colors"
+                >
+                  E-Commerce
+                </Link>
+              </li>
             </ul>
           </div>
 

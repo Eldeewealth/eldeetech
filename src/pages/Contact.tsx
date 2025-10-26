@@ -1,4 +1,5 @@
-import { useState } from "react";
+// Top-level imports in Contact.tsx
+import { useState, useEffect } from "react";
 import { Mail, MapPin, Phone, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,8 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { useSearchParams } from "react-router-dom";
 
-const Contact = () => {
+function Contact() {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
@@ -19,6 +21,14 @@ const Contact = () => {
     botcheck: "", // honeypot in state
   });
   const [loading, setLoading] = useState(false);
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const subjectParam = searchParams.get("subject");
+    if (subjectParam) {
+      setFormData((prev) => ({ ...prev, subject: subjectParam }));
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
