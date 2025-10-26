@@ -25,13 +25,37 @@ function makeTicketId() {
 }
 
 function getBannerAttachment() {
-  const bannerPath = path.join(process.cwd(), 'public', 'email-banner.svg');
-  if (fs.existsSync(bannerPath)) {
+  const pub = path.join(process.cwd(), 'public');
+  const pngPath = path.join(pub, 'email-banner.png');
+  const jpgPath = path.join(pub, 'email-banner.jpg');
+  const svgPath = path.join(pub, 'email-banner.svg');
+
+  if (fs.existsSync(pngPath)) {
+    return {
+      filename: 'email-banner.png',
+      path: pngPath,
+      cid: 'email-banner',
+      contentType: 'image/png',
+      contentDisposition: 'inline',
+    };
+  }
+  if (fs.existsSync(jpgPath)) {
+    return {
+      filename: 'email-banner.jpg',
+      path: jpgPath,
+      cid: 'email-banner',
+      contentType: 'image/jpeg',
+      contentDisposition: 'inline',
+    };
+  }
+  // Avoid SVG inline for Gmail/webmail; will fall back to CSS brand bar.
+  if (process.env.EMAIL_BANNER_ALLOW_SVG === 'true' && fs.existsSync(svgPath)) {
     return {
       filename: 'email-banner.svg',
-      path: bannerPath,
+      path: svgPath,
       cid: 'email-banner',
       contentType: 'image/svg+xml',
+      contentDisposition: 'inline',
     };
   }
   return null;
@@ -39,21 +63,29 @@ function getBannerAttachment() {
 
 function buildCustomerHtml(ticketId, dateStr, form, hasBanner) {
   const baseStyles = `font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji'; color:#0f172a;`;
+  const smallStyles = `font-size:12px;color:#475569`;
   const footer = hasBanner
-    ? `<div style="margin-top:24px;text-align:center"><img src="cid:email-banner" alt="ELDEETECH" style="max-width:100%;height:auto"/></div>`
+    ? `<div style="margin-top:24px;text-align:center">
+         <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse:collapse">
+           <tr>
+             <td align="center" style="padding:0;margin:0">
+               <img src="cid:email-banner" alt="ELDEETECH" title="ELDEETECH" width="560" style="display:block;border:0;outline:none;text-decoration:none;width:100%;max-width:560px;height:auto;margin:0 auto"/>
+             </td>
+           </tr>
+         </table>
+       </div>`
     : `<div style="margin-top:24px;padding:16px;background:#0b5ed7;color:#fff;text-align:center;border-radius:8px">Empowering Technology, Creativity and AI-Driven Innovation</div>`;
+
+  const safeName = typeof form.name === 'string' ? escapeHtml(form.name) : '';
 
   return `
   <div style="${baseStyles}">
-    <h2 style="margin:0 0 8px">We received your request — Ticket ${ticketId}</h2>
-    <p style="margin:0 0 12px">Thanks ${form.name || ''}! We've logged your message. Our team will reach out soon.</p>
-    <div style="margin:16px 0;padding:12px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc">
-      <p style="margin:0 0 8px"><strong>Date:</strong> ${dateStr}</p>
-      ${form.subject ? `<p style="margin:0 0 8px"><strong>Subject:</strong> ${escapeHtml(form.subject)}</p>` : ''}
-      ${form.message ? `<p style="margin:0"><strong>Message:</strong><br/>${escapeHtml(form.message)}</p>` : ''}
-    </div>
-    <p style="margin:16px 0 0;font-size:14px;color:#475569">Ticket ID: <strong>${ticketId}</strong></p>
+    <h2 style="margin:0 0 8px">Dear ${safeName},</h2>
+    <p style="margin:0 0 14px">Thank you so much for taking time to reach out to us. Your query has been logged and is receiving due attention.</p>
+    <p style="margin:0 0 14px">We are committed to providing you with the best support possible. Your ticket ID is <strong>${ticketId}</strong> of <strong>${dateStr}</strong>. We will reference this ID in all our next engagement with you.</p>
+    <p style="margin:0 0 14px">Feel free to contact us here using the same ticket ID and we will get in touch!</p>
     ${footer}
+        <p style="margin:16px 0 0; ${smallStyles}">This is an automated acknowledgement. A member of our team will respond shortly.</p>
   </div>`;
 }
 
@@ -127,8 +159,9 @@ module.exports = async (req, res) => {
     },
   });
 
-  const fromAddr = ZOHO_USER || 'info@eldeetech.com.ng';
-  const toPrimary = process.env.TO_PRIMARY || ZOHO_USER || 'info@eldeetech.com.ng';
+  const fromAddrEmail = ZOHO_USER || 'info@eldeetech.com.ng';
+  const fromAddr = `Eldeetech Ltd <${fromAddrEmail}>`;
+  const toPrimary = process.env.TO_PRIMARY || fromAddrEmail || 'info@eldeetech.com.ng';
   const toCc = process.env.TO_CC || '';
 
   const bannerAttachment = getBannerAttachment();
