@@ -2,6 +2,48 @@ const fs = require('fs');
 const path = require('path');
 const nodemailer = require('nodemailer');
 
+let __dbInitialized = false;
+async function getSql() {
+  try {
+    if (!process.env.DATABASE_URL) return null;
+    const mod = await import('@neondatabase/serverless');
+    return mod.neon(process.env.DATABASE_URL);
+  } catch (_) {
+    return null;
+  }
+}
+
+async function ensureSchema(sql) {
+  if (!sql || __dbInitialized) return;
+  try {
+    await sql(`
+      CREATE TABLE IF NOT EXISTS contact_submissions (
+        id BIGSERIAL PRIMARY KEY,
+        ticket_id TEXT UNIQUE NOT NULL,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        name TEXT NOT NULL,
+        email TEXT NOT NULL,
+        phone TEXT,
+        subject TEXT,
+        message TEXT NOT NULL,
+        service_slug TEXT,
+        website TEXT,
+        ip TEXT,
+        user_agent TEXT,
+        referer TEXT,
+        admin_sent BOOLEAN DEFAULT FALSE,
+        customer_sent BOOLEAN DEFAULT FALSE,
+        error TEXT
+      );
+      CREATE INDEX IF NOT EXISTS idx_contact_submissions_created_at ON contact_submissions (created_at);
+      CREATE INDEX IF NOT EXISTS idx_contact_submissions_email ON contact_submissions (email);
+    `);
+    __dbInitialized = true;
+  } catch (e) {
+    // Don't crash function if schema setup fails
+  }
+}
+
 function formatDate(date, tz) {
   try {
     return new Intl.DateTimeFormat('en-NG', {
@@ -148,6 +190,35 @@ module.exports = async (req, res) => {
   const ticketId = makeTicketId();
   const dateStr = formatDate(new Date(), process.env.EMAIL_TZ || 'Africa/Lagos');
 
+  // Optional DB insert (Neon/Vercel Postgres)
+  let sql = null;
+  try {
+    sql = await getSql();
+    await ensureSchema(sql);
+    if (sql) {
+      const ip = (req.headers['x-forwarded-for'] || '').toString().split(',')[0].trim();
+      const userAgent = (req.headers['user-agent'] || '').toString();
+      const referer = (req.headers['referer'] || req.headers['referrer'] || '').toString();
+      await sql`
+        INSERT INTO contact_submissions (
+          ticket_id, name, email, phone, subject, message, service_slug, website, ip, user_agent, referer
+        ) VALUES (
+          ${ticketId}, ${name}, ${email}, ${phone || ''}, ${subject || ''}, ${message}, ${''}, ${body.website || ''}, ${ip}, ${userAgent}, ${referer}
+        )
+        ON CONFLICT (ticket_id) DO UPDATE SET
+          name = EXCLUDED.name,
+          email = EXCLUDED.email,
+          phone = EXCLUDED.phone,
+          subject = EXCLUDED.subject,
+          message = EXCLUDED.message,
+          website = EXCLUDED.website;
+      `;
+    }
+  } catch (e) {
+    // Log but do not fail request on DB error
+    console.error('DB insert error:', e && e.message ? e.message : e);
+  }
+
   // SMTP transport
   const transporter = nodemailer.createTransport({
     host: process.env.ZOHO_SMTP_HOST || 'smtp.zoho.eu',
@@ -192,10 +263,13 @@ module.exports = async (req, res) => {
 
   try {
     await transporter.sendMail(adminMail);
+    try { if (sql) { await sql`UPDATE contact_submissions SET admin_sent = TRUE WHERE ticket_id = ${ticketId}`; } } catch (_) {}
     await transporter.sendMail(customerMail);
+    try { if (sql) { await sql`UPDATE contact_submissions SET customer_sent = TRUE WHERE ticket_id = ${ticketId}`; } } catch (_) {}
     return res.status(200).json({ success: true, message: 'Sent', ticketId, date: dateStr });
   } catch (err) {
     const msg = err && err.message ? err.message : 'Failed to send email';
+    try { if (sql) { await sql`UPDATE contact_submissions SET error = ${msg} WHERE ticket_id = ${ticketId}`; } } catch (_) {}
     return res.status(500).json({ success: false, message: msg });
   }
 };
