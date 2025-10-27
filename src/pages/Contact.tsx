@@ -19,14 +19,20 @@ function Contact() {
     subject: "",
     message: "",
     botcheck: "", // honeypot in state
+    service: "",
   });
   const [loading, setLoading] = useState(false);
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
     const subjectParam = searchParams.get("subject");
-    if (subjectParam) {
-      setFormData((prev) => ({ ...prev, subject: subjectParam }));
+    const serviceParam = searchParams.get("service");
+    if (subjectParam || serviceParam) {
+      setFormData((prev) => ({
+        ...prev,
+        subject: subjectParam ?? prev.subject,
+        service: serviceParam ?? prev.service,
+      }));
     }
   }, [searchParams]);
 
@@ -69,7 +75,7 @@ function Contact() {
           title: "Message Sent!",
           description: "Thank you for contacting us. We'll get back to you soon.",
         });
-        setFormData({ name: "", email: "", phone: "", subject: "", message: "", botcheck: "" });
+        setFormData({ name: "", email: "", phone: "", subject: "", message: "", botcheck: "", service: "" });
       } else {
         const msg = data?.message || `${res.status} ${res.statusText}` || "Unable to send message at the moment.";
         toast({ title: "Failed to send", description: msg, variant: "destructive" });

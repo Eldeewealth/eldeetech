@@ -5,9 +5,17 @@ const nodemailer = require('nodemailer');
 let __dbInitialized = false;
 async function getSql() {
   try {
-    if (!process.env.DATABASE_URL) return null;
+    const candidates = [
+      process.env.DATABASE_URL,
+      process.env.POSTGRES_URL_NON_POOLING, // Vercel/Neon recommended for HTTP driver
+      process.env.DATABASE_URL_UNPOOLED,
+      process.env.POSTGRES_URL, // pooled; works but non-pooled preferred
+      process.env.POSTGRES_PRISMA_URL,
+    ].filter(Boolean);
+    const url = candidates[0];
+    if (!url) return null;
     const mod = await import('@neondatabase/serverless');
-    return mod.neon(process.env.DATABASE_URL);
+    return mod.neon(url);
   } catch (_) {
     return null;
   }
@@ -170,6 +178,7 @@ module.exports = async (req, res) => {
   }
 
   const { name, email, phone, subject, message } = body || {};
+  const serviceSlug = (body && (body.service || body.service_slug)) ? String(body.service || body.service_slug) : '';
   const botcheck = body.botcheck || body.honeypot;
 
   // Honeypot: if present, pretend success without sending
@@ -203,7 +212,7 @@ module.exports = async (req, res) => {
         INSERT INTO contact_submissions (
           ticket_id, name, email, phone, subject, message, service_slug, website, ip, user_agent, referer
         ) VALUES (
-          ${ticketId}, ${name}, ${email}, ${phone || ''}, ${subject || ''}, ${message}, ${''}, ${body.website || ''}, ${ip}, ${userAgent}, ${referer}
+          ${ticketId}, ${name}, ${email}, ${phone || ''}, ${subject || ''}, ${message}, ${serviceSlug}, ${body.website || ''}, ${ip}, ${userAgent}, ${referer}
         )
         ON CONFLICT (ticket_id) DO UPDATE SET
           name = EXCLUDED.name,
@@ -211,7 +220,8 @@ module.exports = async (req, res) => {
           phone = EXCLUDED.phone,
           subject = EXCLUDED.subject,
           message = EXCLUDED.message,
-          website = EXCLUDED.website;
+          website = EXCLUDED.website,
+          service_slug = EXCLUDED.service_slug;
       `;
     }
   } catch (e) {

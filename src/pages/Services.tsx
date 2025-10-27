@@ -119,7 +119,8 @@ const Services = () => {
                   {category.services.map((service, serviceIndex) => {
                     const ServiceIcon = service.icon;
                     const subject = `Enquiry on your "${service.name}" service`;
-                    const to = `/contact?subject=${encodeURIComponent(subject)}`;
+                    const serviceSlug = slug(service.name);
+                    const to = `/contact?service=${encodeURIComponent(serviceSlug)}&subject=${encodeURIComponent(subject)}`;
                     const serviceId = `service-${slug(service.name)}`;
 
                     return (
