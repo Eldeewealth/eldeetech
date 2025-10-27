@@ -1,5 +1,5 @@
 // src/pages/Contact.tsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Mail, MapPin, Phone, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,15 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-
-// Util: URL-encode body for Netlify Forms
-const encode = (data: Record<string, string>) =>
-  Object.keys(data)
-    .map((k) => encodeURIComponent(k) + "=" + encodeURIComponent(data[k]))
-    .join("&");
+import { useSearchParams } from "react-router-dom";
 
 const Contact = () => {
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -26,6 +22,14 @@ const Contact = () => {
     botcheck: "",
   });
   const [submitting, setSubmitting] = useState(false);
+
+  // Prefill subject from query string when coming from Services
+  useEffect(() => {
+    const s = searchParams.get("subject");
+    if (s) {
+      setFormData((prev) => ({ ...prev, subject: s }));
+    }
+  }, [searchParams]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -53,7 +57,8 @@ const Contact = () => {
 
     setSubmitting(true);
     try {
-      const res = await fetch("/.netlify/functions/send-mail", {
+      // Use Vercel/Node API route in prod and Vite proxy in dev
+      const res = await fetch("/api/send-mail", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -189,7 +194,7 @@ const Contact = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {/* Netlify Form */}
+                  {/* Contact Form */}
                 <form
                   onSubmit={handleSubmit}
                   className="space-y-6"
@@ -204,8 +209,7 @@ const Contact = () => {
                     tabIndex={-1}
                     autoComplete="off"
                   />
-                  // Removed leftover Netlify inputs
-                  // (deleted form-name and bot-field elements)
+                  {/* Hidden honeypot field for spam prevention */}
                
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

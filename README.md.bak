@@ -1,0 +1,117 @@
+# 🌐 Eldeetech Ltd – Official Website
+
+**Live Preview:** [https://eldeetch.netlify.app](https://eldeetch.netlify.app)  
+**Custom Domain:** [https://eldeetech.com.ng](https://eldeetech.com.ng)
+
+---
+
+## 🏢 About Eldeetech Ltd
+
+Eldeetech Ltd is an integrated **Information Technology, Digital Solutions, and Data Consultancy** firm based in Nigeria.  
+We deliver end-to-end technology services — from software development and digital transformation to data analytics and cloud consulting — empowering businesses and individuals to thrive in a digital economy.
+
+This website serves as our **corporate presence and client gateway**, showcasing our expertise, service portfolio, and contact channels.
+
+---
+<img width="1891" height="1740" alt="image" src="https://github.com/user-attachments/assets/5bd5e1de-c44f-469c-a71a-834f07be05d8" />
+
+---
+<img width="1788" height="3045" alt="image" src="https://github.com/user-attachments/assets/ad6a81a9-48ef-416a-b4d3-8ad4ad746216" />
+
+---
+
+## 🎯 Purpose of the Website
+
+The Eldeetech website was designed to:
+
+- Present Eldeetech Ltd as a **modern, innovative, and trustworthy IT solutions provider**.  
+- Communicate the company’s **vision, mission, and service offerings** clearly.  
+- Provide a **professional contact interface** for client inquiries and project requests.  
+- Integrate with **Zoho Mail** for business communication via `info@eldeetech.com.ng`.  
+- Demonstrate the company’s capability in **front-end engineering, UX design, and cloud deployment**.
+
+The project aligns with Eldeetech’s brand identity — simplicity, performance, and precision — while maintaining full responsiveness and SEO-ready structure.
+
+---
+
+## ⚙️ Tech Stack
+
+| Category | Technologies |
+|-----------|--------------|
+| **Frontend Framework** | [React 18+](https://react.dev/) |
+| **Build Tool** | [Vite](https://vitejs.dev/) |
+| **Language** | TypeScript |
+| **UI Components** | [shadcn/ui](https://ui.shadcn.com/) |
+| **Styling** | [Tailwind CSS](https://tailwindcss.com/) |
+| **Icons** | [Lucide React](https://lucide.dev/) |
+| **Hosting** | [Netlify](https://www.netlify.com/) |
+| **Mail Integration** | [Zoho Mail](https://www.zoho.com/mail/) |
+| **Domain** | `eldeetech.com.ng` via Cloudflare DNS |
+
+---
+
+## 🧩 Key Features
+
+- **Modern UI/UX:** Clean interface with responsive layouts for mobile, tablet, and desktop.  
+- **Dynamic Components:** Built with modular React + TypeScript structure.  
+- **Contact Form:** Netlify Forms integration for secure, spam-protected submissions sent to Zoho Mail.  
+- **Optimized Performance:** Fast builds, lazy loading, and compressed assets.  
+- **SEO-Friendly:** Proper meta tags, OpenGraph previews, and clean URL routing.  
+- **SSL & Security:** HTTPS enforced via Let’s Encrypt on Netlify and Cloudflare.
+
+---
+
+## 🛠️ Local Development
+
+To run and modify the project locally:
+
+```bash
+# 1️⃣ Clone this repository
+git clone <YOUR_GIT_URL>
+
+# 2️⃣ Move into the project directory
+cd eldeetech-website
+
+# 3️⃣ Install dependencies
+npm install
+
+# 4️⃣ Start the development server
+npm run dev
+```
+
+**Edit a file directly in GitHub**
+
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
+
+**Use GitHub Codespaces**
+
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
+
+## What technologies are used for this project?
+
+This project is built with:
+
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
+
+## How can I deploy this project?
+
+Simply open [Lovable](https://lovable.dev/projects/c48780c8-0899-4ca7-ba28-8b27398652f8) and click on Share -> Publish.
+
+## Can I connect a custom domain to my Lovable project?
+
+Yes, you can!
+
+To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+
+Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+

@@ -103,26 +103,33 @@ const Services = () => {
                   {category.services.map((service, serviceIndex) => {
                     const ServiceIcon = service.icon;
                     return (
-                      <Card
+                      <Link
                         key={serviceIndex}
-                        className="border-border bg-card hover:shadow-tech transition-all duration-300 group"
+                        to={`/contact?subject=${encodeURIComponent(
+                          `I would want your ${service.name} service`
+                        )}`}
+                        className="block focus:outline-none focus:ring-2 focus:ring-accent/60 rounded-xl"
                       >
-                        <CardHeader>
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-center space-x-3">
-                              <div className="w-12 h-12 rounded-lg bg-gradient-primary flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
-                                <ServiceIcon className="w-6 h-6 text-primary-foreground" />
+                        <Card
+                          className="border-border bg-card hover:shadow-tech transition-all duration-300 group cursor-pointer"
+                        >
+                          <CardHeader>
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-12 h-12 rounded-lg bg-gradient-primary flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
+                                  <ServiceIcon className="w-6 h-6 text-primary-foreground" />
+                                </div>
+                                <CardTitle className="text-xl text-foreground group-hover:text-accent transition-colors">
+                                  {service.name}
+                                </CardTitle>
                               </div>
-                              <CardTitle className="text-xl text-foreground group-hover:text-accent transition-colors">
-                                {service.name}
-                              </CardTitle>
                             </div>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-muted-foreground">{service.description}</p>
-                        </CardContent>
-                      </Card>
+                          </CardHeader>
+                          <CardContent>
+                            <p className="text-muted-foreground">{service.description}</p>
+                          </CardContent>
+                        </Card>
+                      </Link>
                     );
                   })}
                 </div>

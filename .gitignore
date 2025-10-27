@@ -64,7 +64,6 @@ id_ed25519
 
 # ── Hosting provider local configs
 .vercel/
-.netlify/
 
 # ── Tests & coverage (add if you use them)
 coverage/
