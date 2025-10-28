@@ -8,13 +8,33 @@ const express = require('express');
 const app = express();
 app.use(express.json({ limit: '1mb' }));
 
-// Reuse the same Vercel handler for consistency
+// Reuse the same Vercel handlers for consistency
 const sendMailHandler = require('./send-mail.js');
+const adminLogin = require('./admin/login.js');
+const adminLogout = require('./admin/logout.js');
+const adminMe = require('./admin/me.js');
+const adminSubmissions = require('./admin/submissions.js');
+const adminExport = require('./admin/export.js');
+const adminStats = require('./admin/stats.js');
+const adminUpdate = require('./admin/update.js');
 
-app.post('/api/send-mail', (req, res) => {
-  // The handler expects Express-like req/res; this is compatible
-  return sendMailHandler(req, res);
-});
+function mount(method, path, handler) {
+  app[method](path, (req, res) => {
+    Promise.resolve(handler(req, res)).catch((err) => {
+      const msg = err && err.message ? err.message : 'Internal Server Error';
+      res.status(500).json({ success: false, message: msg });
+    });
+  });
+}
+
+mount('post', '/api/send-mail', sendMailHandler);
+mount('post', '/api/admin/login', adminLogin);
+mount('post', '/api/admin/logout', adminLogout);
+mount('get', '/api/admin/me', adminMe);
+mount('get', '/api/admin/submissions', adminSubmissions);
+mount('get', '/api/admin/export.csv', adminExport);
+mount('get', '/api/admin/stats', adminStats);
+mount('post', '/api/admin/update', adminUpdate);
 
 // Optional health check
 app.get('/api/health', (_req, res) => res.json({ ok: true }));

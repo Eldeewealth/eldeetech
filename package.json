@@ -8,9 +8,12 @@
     "preview": "vite preview --strictPort --port 4173",
     "dev:api": "node api/dev-server.js",
     "dev:all": "concurrently \"npm:dev:api\" \"npm:dev\"",
+    "hash:password": "node scripts/hash-password.js --",
     "start:all": "npm run dev:all"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
     "@neondatabase/serverless": "^0.10.4",
     "nodemailer": "^7.0.10",
     "@hookform/resolvers": "^3.10.0",

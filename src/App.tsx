@@ -10,6 +10,8 @@ import Training from "./pages/Training";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import WhatsAppWidget from "./components/WhatsAppWidget";
+import Admin from "./pages/Admin";
+import AdminLoginRedirect from "./pages/AdminLoginRedirect";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +27,8 @@ const App = () => (
           <Route path="/services" element={<Services />} />
           <Route path="/training" element={<Training />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/admin/login" element={<AdminLoginRedirect />} />
+          <Route path="/admin" element={<Admin />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
