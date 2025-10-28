@@ -50,6 +50,16 @@ export default function Admin() {
     return;
   }, [authed]);
 
+  // Force logout when navigating away from /admin (component unmount)
+  useEffect(() => {
+    return () => {
+      // Best-effort logout to clear session cookie
+      fetch('/api/admin/logout', { method: 'POST' }).finally(() => {
+        setAuthed(false);
+      });
+    };
+  }, []);
+
   if (!checked) return null;
 
   if (!authed) return <AdminLogin onSuccess={() => setAuthed(true)} />;

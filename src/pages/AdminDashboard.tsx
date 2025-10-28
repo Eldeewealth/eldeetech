@@ -22,6 +22,7 @@ export default function AdminDashboard({ embedded }: Props) {
   const [rows, setRows] = useState<Row[]>([]);
   const [q, setQ] = useState("");
   const [service, setService] = useState("");
+  const [serviceOpts, setServiceOpts] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [checking, setChecking] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,6 +33,8 @@ export default function AdminDashboard({ embedded }: Props) {
   const [stats, setStats] = useState<any>(null);
   const [selected, setSelected] = useState<Row | null>(null);
   const [notesDraft, setNotesDraft] = useState<string>("");
+  const [searchOpts, setSearchOpts] = useState<string[]>([]);
+  const [fetchCtrl, setFetchCtrl] = useState<AbortController | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -45,7 +48,7 @@ export default function AdminDashboard({ embedded }: Props) {
       params.set("page", String(page));
       params.set("pageSize", String(pageSize));
       const res = await fetch(`/api/admin/submissions?${params.toString()}`);
-      if (res.status === 401) { navigate('/admin/login'); return; }
+      if (res.status === 401) { navigate('/admin'); return; }
       const data = await res.json();
       if (res.ok && data?.success) setRows(data.data);
       else setError(data?.message || 'Failed to load');
@@ -62,7 +65,7 @@ export default function AdminDashboard({ embedded }: Props) {
       if (from) params.set('from', from);
       if (to) params.set('to', to);
       const res = await fetch(`/api/admin/stats?${params.toString()}`);
-      if (res.status === 401) { navigate('/admin/login'); return; }
+      if (res.status === 401) { navigate('/admin'); return; }
       const data = await res.json();
       if (res.ok && data?.success) setStats(data);
     } catch (_) {}
@@ -85,9 +88,44 @@ export default function AdminDashboard({ embedded }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [embedded]);
 
+  // Debounced suggestion fetchers for search and service
+  useEffect(() => {
+    const qv = q.trim();
+    if (fetchCtrl) fetchCtrl.abort();
+    const ctrl = new AbortController();
+    setFetchCtrl(ctrl);
+    const t = setTimeout(async () => {
+      try {
+        if (qv.length >= 2) {
+          const r = await fetch(`/api/admin/suggest/search?q=${encodeURIComponent(qv)}`, { signal: ctrl.signal });
+          const d = await r.json();
+          if (r.ok && d?.success) setSearchOpts(d.options || []);
+        } else {
+          setSearchOpts([]);
+        }
+      } catch (_) {}
+    }, 200);
+    return () => { clearTimeout(t); ctrl.abort(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q]);
+
+  useEffect(() => {
+    const sv = service.trim();
+    const ctrl = new AbortController();
+    const t = setTimeout(async () => {
+      try {
+        const r = await fetch(`/api/admin/suggest/service?q=${encodeURIComponent(sv)}`, { signal: ctrl.signal });
+        const d = await r.json();
+        if (r.ok && d?.success) setServiceOpts(d.options || []);
+      } catch (_) {}
+    }, 200);
+    return () => { clearTimeout(t); ctrl.abort(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [service]);
+
   const logout = async () => {
     await fetch('/api/admin/logout', { method: 'POST' });
-    navigate('/admin/login');
+    navigate('/admin');
   };
 
   const exportCsv = () => {
@@ -118,11 +156,21 @@ export default function AdminDashboard({ embedded }: Props) {
             </div>
             <div>
               <label className="text-xs text-muted-foreground">Search</label>
-              <Input placeholder="name/email/subject/message" value={q} onChange={(e)=>{ setQ(e.target.value); setPage(1); }} />
+              <Input list="search-suggest" placeholder="name/email/subject/message" value={q} onChange={(e)=>{ setQ(e.target.value); setPage(1); }} />
+              <datalist id="search-suggest">
+                {searchOpts.map((opt) => (
+                  <option key={opt} value={opt} />
+                ))}
+              </datalist>
             </div>
             <div>
               <label className="text-xs text-muted-foreground">Service slug</label>
-              <Input placeholder="it-consulting" value={service} onChange={(e)=>{ setService(e.target.value); setPage(1); }} />
+              <Input list="service-suggest" placeholder="it-consulting" value={service} onChange={(e)=>{ setService(e.target.value); setPage(1); }} />
+              <datalist id="service-suggest">
+                {serviceOpts.map((opt) => (
+                  <option key={opt} value={opt} />
+                ))}
+              </datalist>
             </div>
           </div>
           <div className="flex items-center gap-2 mb-6">

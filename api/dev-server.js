@@ -17,6 +17,8 @@ const adminSubmissions = require('./admin/submissions.js');
 const adminExport = require('./admin/export.js');
 const adminStats = require('./admin/stats.js');
 const adminUpdate = require('./admin/update.js');
+const suggestService = require('./admin/suggest-service.js');
+const suggestSearch = require('./admin/suggest-search.js');
 
 function mount(method, path, handler) {
   app[method](path, (req, res) => {
@@ -35,6 +37,8 @@ mount('get', '/api/admin/submissions', adminSubmissions);
 mount('get', '/api/admin/export.csv', adminExport);
 mount('get', '/api/admin/stats', adminStats);
 mount('post', '/api/admin/update', adminUpdate);
+mount('get', '/api/admin/suggest/service', suggestService);
+mount('get', '/api/admin/suggest/search', suggestSearch);
 
 // Optional health check
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
