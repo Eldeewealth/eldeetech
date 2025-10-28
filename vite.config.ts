@@ -29,10 +29,10 @@ export default defineConfig(({ mode }) => ({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            if (id.includes('react')) return 'vendor-react';
-            if (id.includes('@radix-ui')) return 'vendor-radix';
-            if (id.includes('lucide-react')) return 'vendor-icons';
+            // Keep React and ReactDOM with the main vendor chunk to avoid
+            // any edge ordering issues in some browsers/CDNs.
             if (id.includes('recharts')) return 'vendor-charts';
+            if (id.includes('@radix-ui')) return 'vendor-radix';
             return 'vendor';
           }
         },
