@@ -20,6 +20,7 @@ async function ensureContactSchema(sql) {
   if (!sql) return;
   try {
     // Some drivers disallow multiple statements; run separately.
+    await sql`ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS subject_input TEXT`;
     await sql`ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS handled BOOLEAN DEFAULT FALSE`;
     await sql`ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS notes TEXT`;
     await sql`ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS handled_at TIMESTAMPTZ`;

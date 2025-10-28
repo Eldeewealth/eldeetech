@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS contact_submissions (
   email TEXT NOT NULL,
   phone TEXT,
   subject TEXT,
+  subject_input TEXT,
   message TEXT NOT NULL,
   service_slug TEXT,
   website TEXT,
@@ -23,4 +24,3 @@ CREATE INDEX IF NOT EXISTS idx_contact_submissions_created_at
 
 CREATE INDEX IF NOT EXISTS idx_contact_submissions_email
   ON contact_submissions (email);
-

@@ -33,6 +33,7 @@ async function ensureSchema(sql) {
         email TEXT NOT NULL,
         phone TEXT,
         subject TEXT,
+        subject_input TEXT,
         message TEXT NOT NULL,
         service_slug TEXT,
         website TEXT,
@@ -46,6 +47,8 @@ async function ensureSchema(sql) {
       CREATE INDEX IF NOT EXISTS idx_contact_submissions_created_at ON contact_submissions (created_at);
       CREATE INDEX IF NOT EXISTS idx_contact_submissions_email ON contact_submissions (email);
     `);
+    // Ensure new columns exist even if table was created previously
+    try { await sql`ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS subject_input TEXT`; } catch (_) {}
     __dbInitialized = true;
   } catch (e) {
     // Don't crash function if schema setup fails
@@ -179,6 +182,19 @@ module.exports = async (req, res) => {
 
   const { name, email, phone, subject, message } = body || {};
   const serviceSlug = (body && (body.service || body.service_slug)) ? String(body.service || body.service_slug) : '';
+
+  function slugToTitle(slug) {
+    try {
+      const s = String(slug || '')
+        .replace(/[-_]+/g, ' ')
+        .trim()
+        .toLowerCase();
+      return s.replace(/\b\w/g, (m) => m.toUpperCase());
+    } catch (_) { return String(slug || ''); }
+  }
+
+  const subjectTrimmed = (subject || '').toString().trim();
+  const subjectFinal = subjectTrimmed || (serviceSlug ? `Enquiry on your "${slugToTitle(serviceSlug)}" service` : '');
   const botcheck = body.botcheck || body.honeypot;
 
   // Honeypot: if present, pretend success without sending
@@ -210,15 +226,16 @@ module.exports = async (req, res) => {
       const referer = (req.headers['referer'] || req.headers['referrer'] || '').toString();
       await sql`
         INSERT INTO contact_submissions (
-          ticket_id, name, email, phone, subject, message, service_slug, website, ip, user_agent, referer
+          ticket_id, name, email, phone, subject, subject_input, message, service_slug, website, ip, user_agent, referer
         ) VALUES (
-          ${ticketId}, ${name}, ${email}, ${phone || ''}, ${subject || ''}, ${message}, ${serviceSlug}, ${body.website || ''}, ${ip}, ${userAgent}, ${referer}
+          ${ticketId}, ${name}, ${email}, ${phone || ''}, ${subjectFinal}, ${subjectTrimmed}, ${message}, ${serviceSlug}, ${body.website || ''}, ${ip}, ${userAgent}, ${referer}
         )
         ON CONFLICT (ticket_id) DO UPDATE SET
           name = EXCLUDED.name,
           email = EXCLUDED.email,
           phone = EXCLUDED.phone,
           subject = EXCLUDED.subject,
+          subject_input = EXCLUDED.subject_input,
           message = EXCLUDED.message,
           website = EXCLUDED.website,
           service_slug = EXCLUDED.service_slug;
