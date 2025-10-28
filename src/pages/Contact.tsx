@@ -224,6 +224,9 @@ function Contact() {
                         required
                         className="border-border bg-background"
                       />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Use a valid, non-temporary email. Disposable emails are blocked.
+                      </p>
                     </div>
                   </div>
 

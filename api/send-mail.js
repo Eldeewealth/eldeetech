@@ -1,6 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 const nodemailer = require('nodemailer');
+const dns = require('dns').promises;
+const { isDisposableDomain } = require('./_disposable');
 
 let __dbInitialized = false;
 async function getSql() {
@@ -204,6 +206,30 @@ module.exports = async (req, res) => {
 
   if (!name || !email || !message) {
     return res.status(400).json({ success: false, message: 'Missing required fields: name, email, message' });
+  }
+
+  // Email validation: format + block disposable domains + optional MX check
+  const emailNorm = String(email || '').trim().toLowerCase();
+  const emailFormat = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+  if (!emailFormat.test(emailNorm)) {
+    return res.status(400).json({ success: false, message: 'Please enter a valid email address' });
+  }
+  const domain = emailNorm.split('@')[1] || '';
+  if (isDisposableDomain(domain)) {
+    return res.status(400).json({ success: false, message: 'Temporary/disposable email domains are not allowed. Please use a permanent email.' });
+  }
+  if (process.env.EMAIL_STRICT_MX === 'true') {
+    try {
+      const mx = await Promise.race([
+        dns.resolveMx(domain),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('MX check timeout')), 1500)),
+      ]);
+      if (!Array.isArray(mx) || mx.length === 0) {
+        return res.status(400).json({ success: false, message: 'Email domain does not appear to accept mail (no MX record)' });
+      }
+    } catch (_) {
+      return res.status(400).json({ success: false, message: 'Unable to verify email domain (MX). Please use a different email.' });
+    }
   }
 
   // Explicit env check for clearer errors during local dev

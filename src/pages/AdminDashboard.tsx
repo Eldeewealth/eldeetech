@@ -9,7 +9,7 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, 
 
 type Row = {
   ticket_id: string; name: string; email: string; phone: string;
-  subject: string; message: string; service_slug: string;
+  subject: string; subject_input?: string; message: string; service_slug: string;
   admin_sent: boolean; customer_sent: boolean; error: string | null;
   created_at: string;
   handled?: boolean; notes?: string | null; handled_at?: string | null; handled_by?: string | null;
@@ -326,6 +326,12 @@ export default function AdminDashboard({ embedded }: Props) {
                     <div className="text-muted-foreground text-sm mb-1">Subject</div>
                     <div className="text-sm bg-background border border-border rounded p-2">{selected.subject}</div>
                   </div>
+                  {selected.subject_input && selected.subject_input !== selected.subject && (
+                    <div>
+                      <div className="text-muted-foreground text-sm mb-1">Subject (User Input)</div>
+                      <div className="text-sm bg-background border border-border rounded p-2">{selected.subject_input}</div>
+                    </div>
+                  )}
                   <div>
                     <div className="text-muted-foreground text-sm mb-1">Message</div>
                     <div className="text-sm bg-background border border-border rounded p-2 whitespace-pre-wrap">{selected.message}</div>

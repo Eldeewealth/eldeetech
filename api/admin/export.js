@@ -33,7 +33,7 @@ module.exports = async (req, res) => {
     const hasTo = !!to;
 
     const rows = await sql`
-      SELECT ticket_id, name, email, phone, subject, message, service_slug,
+      SELECT ticket_id, name, email, phone, subject, subject_input, message, service_slug,
              admin_sent, customer_sent, error, created_at,
              handled, notes, handled_at, handled_by
       FROM contact_submissions
