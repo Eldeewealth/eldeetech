@@ -27,19 +27,21 @@ module.exports = async (req, res) => {
     if (!sql) return res.status(500).json({ success: false, message: 'Database not configured' });
     await ensureContactSchema(sql);
 
-    const where = [];
-    if (q) where.push(`(name ILIKE ${'%' + q + '%'} OR email ILIKE ${'%' + q + '%'} OR subject ILIKE ${'%' + q + '%'} OR message ILIKE ${'%' + q + '%'})`);
-    if (service) where.push(`service_slug = ${service}`);
-    if (from) where.push(`created_at >= ${from}`);
-    if (to) where.push(`created_at <= ${to}`);
-    const conditions = where.length ? sql`WHERE ` + sql(where.join(' AND ')) : sql``;
+    const hasQ = !!q;
+    const hasService = !!service;
+    const hasFrom = !!from;
+    const hasTo = !!to;
 
     const rows = await sql`
       SELECT ticket_id, name, email, phone, subject, message, service_slug,
              admin_sent, customer_sent, error, created_at,
              handled, notes, handled_at, handled_by
       FROM contact_submissions
-      ${conditions}
+      WHERE
+        (${hasQ} = false OR (name ILIKE ${'%' + q + '%'} OR email ILIKE ${'%' + q + '%'} OR subject ILIKE ${'%' + q + '%'} OR message ILIKE ${'%' + q + '%'}))
+        AND (${hasService} = false OR service_slug = ${service})
+        AND (${hasFrom} = false OR created_at >= ${from})
+        AND (${hasTo} = false OR created_at <= ${to})
       ORDER BY created_at DESC
     `;
 
