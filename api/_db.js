@@ -19,16 +19,14 @@ async function getSql() {
 async function ensureContactSchema(sql) {
   if (!sql) return;
   try {
-    await sql`
-      ALTER TABLE contact_submissions
-        ADD COLUMN IF NOT EXISTS handled BOOLEAN DEFAULT FALSE,
-        ADD COLUMN IF NOT EXISTS notes TEXT,
-        ADD COLUMN IF NOT EXISTS handled_at TIMESTAMPTZ,
-        ADD COLUMN IF NOT EXISTS handled_by TEXT;
-      CREATE INDEX IF NOT EXISTS idx_contact_submissions_handled ON contact_submissions (handled);
-    `;
-  } catch (_) {
-    // ignore
+    // Some drivers disallow multiple statements; run separately.
+    await sql`ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS handled BOOLEAN DEFAULT FALSE`;
+    await sql`ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS notes TEXT`;
+    await sql`ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS handled_at TIMESTAMPTZ`;
+    await sql`ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS handled_by TEXT`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_contact_submissions_handled ON contact_submissions (handled)`;
+  } catch (e) {
+    console.error('ensureContactSchema error:', e && e.message ? e.message : e);
   }
 }
 

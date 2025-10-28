@@ -1,5 +1,5 @@
 const { requireAdmin } = require('./_auth');
-const { getSql } = require('../_db');
+const { getSql, ensureContactSchema } = require('../_db');
 
 module.exports = async (req, res) => {
   if (req.method !== 'GET') return res.status(405).json({ success: false, message: 'Method Not Allowed' });
@@ -8,6 +8,7 @@ module.exports = async (req, res) => {
   try {
     const sql = await getSql();
     if (!sql) return res.status(500).json({ success: false, message: 'Database not configured' });
+    await ensureContactSchema(sql);
 
     const url = new URL(req.url, 'http://localhost');
     const from = url.searchParams.get('from');
@@ -59,4 +60,3 @@ module.exports = async (req, res) => {
     res.status(500).json({ success: false, message: msg });
   }
 };
-
