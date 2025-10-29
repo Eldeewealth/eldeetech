@@ -51,7 +51,10 @@ module.exports = async (req, res) => {
       return res.status(400).json({ success: false, message: 'No updates to apply' });
     }
 
-    const setClause = sql.join(updates, sql`, `);
+    let setClause = updates[0];
+    for (let i = 1; i < updates.length; i += 1) {
+      setClause = sql`${setClause}, ${updates[i]}`;
+    }
 
     const rows = await sql`
       UPDATE contact_submissions
