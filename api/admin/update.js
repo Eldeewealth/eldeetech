@@ -26,43 +26,36 @@ module.exports = async (req, res) => {
     const handledBy = me?.sub || 'admin';
     const nowIso = new Date().toISOString();
 
-    const setParts = [];
-    const params = [];
+    const fragments = [];
 
     if (handledVal !== undefined) {
-      setParts.push(`handled = $${params.length + 1}`);
-      params.push(handledVal);
-
-      setParts.push(`handled_at = $${params.length + 1}`);
-      params.push(handledVal ? nowIso : null);
-
+      fragments.push(sql`handled = ${handledVal}`);
+      fragments.push(sql`handled_at = ${handledVal ? nowIso : null}`);
       const handledByFinal = handledVal ? (handledByVal !== undefined ? handledByVal : handledBy) : null;
-      setParts.push(`handled_by = $${params.length + 1}`);
-      params.push(handledByFinal);
+      fragments.push(sql`handled_by = ${handledByFinal}`);
     } else if (handledByVal !== undefined) {
-      setParts.push(`handled_by = $${params.length + 1}`);
-      params.push(handledByVal);
+      fragments.push(sql`handled_by = ${handledByVal}`);
     }
 
     if (notesVal !== undefined) {
-      setParts.push(`notes = $${params.length + 1}`);
-      params.push(notesVal);
+      fragments.push(sql`notes = ${notesVal}`);
     }
 
-    if (!setParts.length) {
+    if (!fragments.length) {
       return res.status(400).json({ success: false, message: 'No updates to apply' });
     }
 
-    params.push(ticket_id);
+    let setClause = fragments[0];
+    for (let i = 1; i < fragments.length; i += 1) {
+      setClause = sql`${setClause}, ${fragments[i]}`;
+    }
 
-    const query = `
+    const rows = await sql`
       UPDATE contact_submissions
-      SET ${setParts.join(', ')}
-      WHERE ticket_id = $${params.length}
+      SET ${setClause}
+      WHERE ticket_id = ${ticket_id}
       RETURNING ticket_id, name, email, phone, subject, subject_input, message, service_slug, admin_sent, customer_sent, error, created_at, handled, notes, handled_at, handled_by
     `;
-
-    const rows = await sql.unsafe(query, params);
 
     return res.status(200).json({ success: true, data: rows[0] });
   } catch (e) {
