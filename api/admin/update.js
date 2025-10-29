@@ -47,8 +47,14 @@ module.exports = async (req, res) => {
       updates.push(sql`handled_by = ${finalHandledBy}`);
     }
 
-    const sep = sql`, `;
-    const setClause = updates.reduce((acc, curr, i) => (i === 0 ? curr : acc + sep + curr), sql``);
+    if (!updates.length) {
+      return res.status(400).json({ success: false, message: 'No updates to apply' });
+    }
+
+    let setClause = updates[0];
+    for (let i = 1; i < updates.length; i += 1) {
+      setClause = sql`${setClause}, ${updates[i]}`;
+    }
 
     const rows = await sql`
       UPDATE contact_submissions
