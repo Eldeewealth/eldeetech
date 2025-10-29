@@ -6,6 +6,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 const Training = () => {
+  // Helper to build stable, URL-safe IDs like on Services
+  const slug = (s: string) => s.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const programs = [
     {
       icon: Code,
@@ -123,6 +125,9 @@ const Training = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
             {programs.map((program, index) => {
               const Icon = program.icon;
+              const subject = `Enquiry on your "${program.title}" training`;
+              const serviceSlug = slug(program.title);
+              const to = `/contact?service=${encodeURIComponent(serviceSlug)}&subject=${encodeURIComponent(subject)}`;
               return (
                 <Card key={index} className="border-border bg-gradient-card hover:shadow-tech transition-all duration-300">
                   <CardHeader>
@@ -153,6 +158,11 @@ const Training = () => {
                       </ul>
                     </div>
                   </CardContent>
+                  <div className="px-6 pb-6 flex justify-end">
+                    <Button size="sm" asChild className="bg-gradient-primary hover:opacity-90">
+                      <Link to={to} aria-label={subject}>Enquire / Enroll</Link>
+                    </Button>
+                  </div>
                 </Card>
               );
             })}

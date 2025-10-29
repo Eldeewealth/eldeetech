@@ -48,6 +48,20 @@ function Contact() {
       return;
     }
 
+    // Client-side email validation for immediate feedback
+    const emailNorm = (formData.email || "").trim().toLowerCase();
+    const emailFormat = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+    if (!emailFormat.test(emailNorm)) {
+      toast({ title: "Invalid email", description: "Please enter a valid email address.", variant: "destructive" });
+      return;
+    }
+    const domain = emailNorm.split('@')[1] || '';
+    const disposableHint = /(?:yopmail|mailinator|tempmail|10minutemail|guerrillamail|trashmail|moakt|maildrop|getnada|fakeinbox|spamgourmet|mintemail|tmail|mailnesia|spam4\.me|dispostable)/i;
+    if (domain === 'yop.com' || disposableHint.test(domain)) {
+      toast({ title: "Email not allowed", description: "Temporary/disposable email domains are blocked. Please use a permanent email.", variant: "destructive" });
+      return;
+    }
+
     // Abort after 15s
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);

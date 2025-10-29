@@ -30,28 +30,50 @@ export default function AdminDashboard({ embedded }: Props) {
   const [to, setTo] = useState<string>("");
   const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(20);
+  const [total, setTotal] = useState<number>(0);
   const [stats, setStats] = useState<any>(null);
   const [selected, setSelected] = useState<Row | null>(null);
   const [notesDraft, setNotesDraft] = useState<string>("");
+  const [handledByDraft, setHandledByDraft] = useState<string>("");
   const [searchOpts, setSearchOpts] = useState<string[]>([]);
   const [fetchCtrl, setFetchCtrl] = useState<AbortController | null>(null);
 
-  const load = async () => {
+  type LoadOpts = {
+    page?: number;
+    pageSize?: number;
+    filters?: { q?: string; service?: string; from?: string; to?: string };
+  };
+
+  const load = async (opts?: LoadOpts) => {
     setLoading(true);
     setError(null);
+    const pageParam = opts?.page ?? page;
+    const pageSizeParam = opts?.pageSize ?? pageSize;
+    const qParam = opts?.filters?.q ?? q;
+    const serviceParam = opts?.filters?.service ?? service;
+    const fromParam = opts?.filters?.from ?? from;
+    const toParam = opts?.filters?.to ?? to;
     try {
       const params = new URLSearchParams();
-      if (q) params.set("q", q);
-      if (service) params.set("service", service);
-      if (from) params.set("from", from);
-      if (to) params.set("to", to);
-      params.set("page", String(page));
-      params.set("pageSize", String(pageSize));
+      if (qParam) params.set("q", qParam);
+      if (serviceParam) params.set("service", serviceParam);
+      if (fromParam) params.set("from", fromParam);
+      if (toParam) params.set("to", toParam);
+      params.set("page", String(pageParam));
+      params.set("pageSize", String(pageSizeParam));
       const res = await fetch(`/api/admin/submissions?${params.toString()}`);
       if (res.status === 401) { navigate('/admin'); return; }
       const data = await res.json();
-      if (res.ok && data?.success) setRows(data.data);
-      else setError(data?.message || 'Failed to load');
+      if (res.ok && data?.success) {
+        setRows(data.data);
+        if (typeof data.total === 'number') setTotal(data.total);
+        else setTotal(Array.isArray(data.data) ? data.data.length : 0);
+        if (typeof data.page === 'number') setPage(data.page);
+        else setPage(pageParam);
+        if (typeof data.pageSize === 'number') setPageSize(data.pageSize);
+      } else {
+        setError(data?.message || 'Failed to load');
+      }
     } catch (e: any) {
       setError(e?.message || 'Network error');
     } finally {
@@ -59,11 +81,13 @@ export default function AdminDashboard({ embedded }: Props) {
     }
   };
 
-  const loadStats = async () => {
+  const loadStats = async (opts?: { from?: string; to?: string }) => {
     try {
       const params = new URLSearchParams();
-      if (from) params.set('from', from);
-      if (to) params.set('to', to);
+      const fromParam = opts?.from ?? from;
+      const toParam = opts?.to ?? to;
+      if (fromParam) params.set('from', fromParam);
+      if (toParam) params.set('to', toParam);
       const res = await fetch(`/api/admin/stats?${params.toString()}`);
       if (res.status === 401) { navigate('/admin'); return; }
       const data = await res.json();
@@ -174,11 +198,21 @@ export default function AdminDashboard({ embedded }: Props) {
             </div>
           </div>
           <div className="flex items-center gap-2 mb-6">
-            <Button onClick={()=>{ load(); loadStats(); }} disabled={loading}>Apply Filters</Button>
-            <Button variant="ghost" onClick={()=>{ setFrom(''); setTo(''); setQ(''); setService(''); setPage(1); load(); loadStats(); }}>Reset</Button>
+            <Button onClick={()=>{ const newPage = 1; setPage(newPage); load({ page: newPage }); loadStats({ from, to }); }} disabled={loading}>Apply Filters</Button>
+            <Button variant="ghost" onClick={()=>{ const newPage = 1; setFrom(''); setTo(''); setQ(''); setService(''); setPage(newPage); load({ page: newPage, filters: { q: '', service: '', from: '', to: '' } }); loadStats({ from: '', to: '' }); }}>Reset</Button>
             <div className="ml-auto flex items-center gap-2 text-sm">
               <span>Page size</span>
-              <select className="border border-border rounded-md bg-background px-2 py-1" value={pageSize} onChange={(e)=>{ setPageSize(parseInt(e.target.value)); setPage(1); load(); }}>
+              <select
+                className="border border-border rounded-md bg-background px-2 py-1"
+                value={pageSize}
+                onChange={(e)=>{
+                  const size = parseInt(e.target.value);
+                  const newPage = 1;
+                  setPageSize(size);
+                  setPage(newPage);
+                  load({ page: newPage, pageSize: size });
+                }}
+              >
                 <option>10</option>
                 <option>20</option>
                 <option>50</option>
@@ -276,7 +310,7 @@ export default function AdminDashboard({ embedded }: Props) {
                     </thead>
                     <tbody>
                       {rows.map((r) => (
-                        <tr key={r.ticket_id} className="border-b border-border hover:bg-muted/30 cursor-pointer" onClick={()=>{ setSelected(r); setNotesDraft(r.notes || ''); }}>
+                        <tr key={r.ticket_id} className="border-b border-border hover:bg-muted/30 cursor-pointer" onClick={()=>{ setSelected(r); setNotesDraft(r.notes || ''); setHandledByDraft(r.handled_by || ''); }}>
                           <td className="py-2 pr-4">{new Date(r.created_at).toLocaleString()}</td>
                           <td className="py-2 pr-4 font-mono text-xs">{r.ticket_id}</td>
                           <td className="py-2 pr-4">{r.name}</td>
@@ -293,9 +327,33 @@ export default function AdminDashboard({ embedded }: Props) {
                 </div>
               )}
               <div className="flex items-center gap-2 justify-end mt-3">
-                <Button variant="secondary" onClick={()=>{ setPage(Math.max(1, page-1)); setTimeout(load, 0); }} disabled={page<=1}>Prev</Button>
-                <span className="text-sm">Page {page}</span>
-                <Button variant="secondary" onClick={()=>{ setPage(page+1); setTimeout(load, 0); }}>Next</Button>
+                <Button
+                  variant="secondary"
+                  onClick={()=>{
+                    const newPage = Math.max(1, page - 1);
+                    if (newPage === page) return;
+                    setPage(newPage);
+                    load({ page: newPage });
+                  }}
+                  disabled={page <= 1 || loading}
+                >Prev</Button>
+                <span className="text-sm">
+                  Page {page}
+                  {total ? ` of ${Math.max(1, Math.ceil(total / pageSize))}` : ''}
+                </span>
+                <Button
+                  variant="secondary"
+                  onClick={()=>{
+                    const totalPages = total ? Math.ceil(total / pageSize) : (rows.length === pageSize ? page + 1 : page);
+                    const newPage = page + 1;
+                    if (total && newPage > totalPages) return;
+                    if (!total && rows.length < pageSize) return;
+                    setPage(newPage);
+                    load({ page: newPage });
+                  }}
+                  disabled={loading || (total ? page >= Math.ceil(total / pageSize) : rows.length < pageSize)}
+                >Next</Button>
+                {total ? <span className="text-xs text-muted-foreground">Total {total}</span> : null}
               </div>
           </CardContent>
           </Card>
@@ -340,19 +398,32 @@ export default function AdminDashboard({ embedded }: Props) {
                     <div className="text-muted-foreground text-sm mb-1">Notes</div>
                     <textarea className="w-full border border-border rounded bg-background p-2 text-sm" rows={4} value={notesDraft} onChange={(e)=>setNotesDraft(e.target.value)} />
                   </div>
+                  <div>
+                    <div className="text-muted-foreground text-sm mb-1">Handled By (name or email)</div>
+                    <Input
+                      value={handledByDraft}
+                      onChange={(e)=>setHandledByDraft(e.target.value)}
+                      placeholder="Who handled this?"
+                      className="border-border bg-background"
+                    />
+                  </div>
                   <div className="flex items-center gap-2 justify-end pt-2">
                     <Button variant={selected.handled ? 'secondary' : 'default'} onClick={async ()=>{
-                      const res = await fetch('/api/admin/update', { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify({ ticket_id: selected.ticket_id, handled: !selected.handled }) });
+                      const res = await fetch('/api/admin/update', { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify({ ticket_id: selected.ticket_id, handled: !selected.handled, handled_by: handledByDraft }) });
                       const data = await res.json();
                       if (res.ok && data?.success) {
-                        const updated = data.data as Row; setSelected(updated); setRows(prev => prev.map(r => r.ticket_id===updated.ticket_id ? updated : r));
+                        const updated = data.data as Row; setSelected(updated); setRows(prev => prev.map(r => r.ticket_id===updated.ticket_id ? updated : r)); setNotesDraft(updated.notes || ''); setHandledByDraft(updated.handled_by || '');
+                      } else {
+                        window.alert(data?.message || 'Failed to update record');
                       }
                     }}>{selected.handled ? 'Mark Unhandled' : 'Mark Handled'}</Button>
                     <Button variant="secondary" onClick={async ()=>{
-                      const res = await fetch('/api/admin/update', { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify({ ticket_id: selected.ticket_id, notes: notesDraft }) });
+                      const res = await fetch('/api/admin/update', { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify({ ticket_id: selected.ticket_id, notes: notesDraft, handled_by: handledByDraft }) });
                       const data = await res.json();
                       if (res.ok && data?.success) {
-                        const updated = data.data as Row; setSelected(updated); setRows(prev => prev.map(r => r.ticket_id===updated.ticket_id ? updated : r));
+                        const updated = data.data as Row; setSelected(updated); setRows(prev => prev.map(r => r.ticket_id===updated.ticket_id ? updated : r)); setNotesDraft(updated.notes || ''); setHandledByDraft(updated.handled_by || '');
+                      } else {
+                        window.alert(data?.message || 'Failed to save notes');
                       }
                     }}>Save Notes</Button>
                     <Button variant="ghost" onClick={()=>setSelected(null)}>Close</Button>

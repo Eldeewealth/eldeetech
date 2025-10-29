@@ -12,6 +12,9 @@ export default function AdminLogin({ onSuccess }: Props) {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [showOtp, setShowOtp] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,14 +26,31 @@ export default function AdminLogin({ onSuccess }: Props) {
       const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, password, otp: otp || undefined }),
       });
       const data = await res.json();
       if (res.ok && data?.success) {
+        setFailedAttempts(0);
+        setShowOtp(false);
+        setOtp("");
         if (onSuccess) onSuccess();
         else navigate("/admin", { replace: true });
       } else {
-        setError(data?.message || "Login failed");
+        const msg = data?.message || "Login failed";
+        setError(msg);
+        setFailedAttempts((prev) => {
+          const next = prev + 1;
+          if (next >= 2) setShowOtp(true);
+          return next;
+        });
+        if (/two-factor|2fa/i.test(msg) || /Provide a valid 2FA code/i.test(msg) || /Too many attempts/i.test(msg)) {
+          setShowOtp(true);
+        }
+        const remainingMatch = msg.match(/Attempts remaining:\s*(\d+)/i);
+        if (remainingMatch) {
+          const remaining = parseInt(remainingMatch[1], 10);
+          if (!Number.isNaN(remaining) && remaining <= 1) setShowOtp(true);
+        }
       }
     } catch (err: any) {
       setError(err?.message || "Network error");
@@ -59,6 +79,36 @@ export default function AdminLogin({ onSuccess }: Props) {
                     <label className="text-sm font-medium">Password</label>
                     <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
                   </div>
+                  {showOtp ? (
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <label className="text-sm font-medium">One-time code</label>
+                        <button
+                          type="button"
+                          className="text-xs text-muted-foreground hover:text-foreground underline"
+                          onClick={() => { setShowOtp(false); setOtp(""); }}
+                        >
+                          Hide
+                        </button>
+                      </div>
+                      <Input
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={8}
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value)}
+                        placeholder="6-digit code"
+                      />
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className="text-xs text-muted-foreground hover:text-foreground underline"
+                      onClick={() => setShowOtp(true)}
+                    >
+                      Use a one-time code
+                    </button>
+                  )}
                   {error && <p className="text-destructive text-sm">{error}</p>}
                   <Button type="submit" className="w-full" disabled={loading}>{loading ? "Signing in..." : "Sign in"}</Button>
                 </form>

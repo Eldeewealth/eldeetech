@@ -4,6 +4,59 @@ const nodemailer = require('nodemailer');
 const dns = require('dns').promises;
 const { isDisposableDomain } = require('./_disposable');
 
+function isAcademicDomain(domain) {
+  if (!domain) return false;
+  const d = String(domain).toLowerCase();
+  if (/\.edu(\.[a-z]{2,})?$/i.test(d)) return true; // .edu or .edu.xx
+  if (/\.ac\.[a-z]{2,}$/i.test(d)) return true;     // .ac.xx
+  if (/\.sch\.[a-z]{2,}$/i.test(d)) return true;    // .sch.xx
+  return false;
+}
+
+function isKnownGlobalProvider(domain) {
+  if (!domain) return false;
+  const d = String(domain).toLowerCase();
+  const patterns = [
+    /(^|\.)gmail\.com$/i,
+    /(^|\.)googlemail\.com$/i,
+    /(^|\.)outlook\.[a-z.]+$/i,
+    /(^|\.)hotmail\.[a-z.]+$/i,
+    /(^|\.)live\.[a-z.]+$/i,
+    /(^|\.)msn\.com$/i,
+    /(^|\.)yahoo\.[a-z.]+$/i,
+    /(^|\.)ymail\.com$/i,
+    /(^|\.)icloud\.com$/i,
+    /(^|\.)me\.com$/i,
+    /(^|\.)aol\.com$/i,
+    /(^|\.)protonmail\.com$/i,
+    /(^|\.)proton\.me$/i,
+    /(^|\.)zoho\.[a-z.]+$/i,
+    /(^|\.)yandex\.[a-z.]+$/i,
+    /(^|\.)gmx\.[a-z.]+$/i,
+    /(^|\.)fastmail\.[a-z.]+$/i,
+  ];
+  return patterns.some((re) => re.test(d));
+}
+
+function isAllowedDomainByEnv(domain) {
+  const extra = (process.env.ALLOW_EMAIL_DOMAINS || '')
+    .split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+  const d = String(domain || '').toLowerCase();
+  if (extra.includes(d)) return true;
+  const re = process.env.ALLOW_EMAIL_DOMAIN_REGEX;
+  if (re) {
+    try {
+      const r = new RegExp(re, 'i');
+      if (r.test(d)) return true;
+    } catch (_) {
+      // ignore invalid regex
+    }
+  }
+  return false;
+}
+
 let __dbInitialized = false;
 async function getSql() {
   try {
@@ -215,6 +268,12 @@ module.exports = async (req, res) => {
     return res.status(400).json({ success: false, message: 'Please enter a valid email address' });
   }
   const domain = emailNorm.split('@')[1] || '';
+  if (process.env.EMAIL_ALLOW_RECOGNIZED_ONLY === 'true') {
+    const allowed = isKnownGlobalProvider(domain) || isAcademicDomain(domain) || isAllowedDomainByEnv(domain);
+    if (!allowed) {
+      return res.status(400).json({ success: false, message: 'Please use a recognized provider or school/work email domain.' });
+    }
+  }
   if (isDisposableDomain(domain)) {
     return res.status(400).json({ success: false, message: 'Temporary/disposable email domains are not allowed. Please use a permanent email.' });
   }
