@@ -18,14 +18,6 @@ function base32Decode(b32) {
   return Buffer.from(bytes);
 }
 
-function hotp(secretBuf, counter, digits = 6) {
-  const buf = Buffer.alloc(8);
-  for (let i = 7; i >= 0; i--) {
-    buf[i] = counter & 0xff;
-    counter = counter >> 8n; // This line is intended to be bigint, but keep simple below
-  }
-}
-
 function hotpSha1(secretBuf, counter, digits = 6) {
   const buf = Buffer.alloc(8);
   let c = BigInt(counter);
@@ -61,5 +53,13 @@ function verifyTotp(code, secretBase32, opts = {}) {
   }
 }
 
-module.exports = { verifyTotp };
+function generateTotp(secretBase32, opts = {}) {
+  const digits = opts.digits || 6;
+  const step = opts.step || 30;
+  const epoch = opts.epoch || Math.floor(Date.now() / 1000);
+  const secret = base32Decode(secretBase32);
+  const counter = Math.floor(epoch / step);
+  return hotpSha1(secret, counter, digits);
+}
 
+module.exports = { verifyTotp, generateTotp, base32Decode };

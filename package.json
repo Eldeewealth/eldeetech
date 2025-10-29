@@ -9,6 +9,7 @@
     "dev:api": "node api/dev-server.js",
     "dev:all": "concurrently \"npm:dev:api\" \"npm:dev\"",
     "hash:password": "node scripts/hash-password.js --",
+    "totp:generate": "node scripts/generate-totp-secret.js --issuer=ELDEETECH --account=admin",
     "start:all": "npm run dev:all"
   },
   "dependencies": {
