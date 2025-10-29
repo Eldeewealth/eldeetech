@@ -2,6 +2,10 @@ const { requireAdmin } = require('./_auth');
 const { getSql, ensureContactSchema } = require('../_db');
 
 module.exports = async (req, res) => {
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Allow', 'POST, OPTIONS');
+    return res.status(204).end();
+  }
   if (req.method !== 'POST') return res.status(405).json({ success: false, message: 'Method Not Allowed' });
   const me = requireAdmin(req, res);
   if (!me) return;
