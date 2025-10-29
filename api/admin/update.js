@@ -26,42 +26,43 @@ module.exports = async (req, res) => {
     const handledBy = me?.sub || 'admin';
     const nowIso = new Date().toISOString();
 
-    const updates = [];
-    if (handledVal !== undefined) {
-      updates.push(sql`handled = ${handledVal}`);
-      updates.push(sql`handled_at = ${handledVal ? nowIso : null}`);
-    }
-    if (notesVal !== undefined) updates.push(sql`notes = ${notesVal}`);
+    const setParts = [];
+    const params = [];
 
-    let finalHandledBy = handledByVal;
     if (handledVal !== undefined) {
-      if (handledVal) {
-        if (finalHandledBy === undefined || finalHandledBy === null) {
-          finalHandledBy = handledBy;
-        }
-      } else {
-        finalHandledBy = null;
-      }
-    }
-    if (finalHandledBy !== undefined) {
-      updates.push(sql`handled_by = ${finalHandledBy}`);
+      setParts.push(`handled = $${params.length + 1}`);
+      params.push(handledVal);
+
+      setParts.push(`handled_at = $${params.length + 1}`);
+      params.push(handledVal ? nowIso : null);
+
+      const handledByFinal = handledVal ? (handledByVal !== undefined ? handledByVal : handledBy) : null;
+      setParts.push(`handled_by = $${params.length + 1}`);
+      params.push(handledByFinal);
+    } else if (handledByVal !== undefined) {
+      setParts.push(`handled_by = $${params.length + 1}`);
+      params.push(handledByVal);
     }
 
-    if (!updates.length) {
+    if (notesVal !== undefined) {
+      setParts.push(`notes = $${params.length + 1}`);
+      params.push(notesVal);
+    }
+
+    if (!setParts.length) {
       return res.status(400).json({ success: false, message: 'No updates to apply' });
     }
 
-    let setClause = updates[0];
-    for (let i = 1; i < updates.length; i += 1) {
-      setClause = sql`${setClause}, ${updates[i]}`;
-    }
+    params.push(ticket_id);
 
-    const rows = await sql`
+    const query = `
       UPDATE contact_submissions
-      SET ${setClause}
-      WHERE ticket_id = ${ticket_id}
+      SET ${setParts.join(', ')}
+      WHERE ticket_id = $${params.length}
       RETURNING ticket_id, name, email, phone, subject, subject_input, message, service_slug, admin_sent, customer_sent, error, created_at, handled, notes, handled_at, handled_by
     `;
+
+    const rows = await sql(query, ...params);
 
     return res.status(200).json({ success: true, data: rows[0] });
   } catch (e) {
